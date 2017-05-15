@@ -49,8 +49,27 @@ angular.module('starter.services', [])
       }
     }
   })
+  .factory('TokenAuth', function ($q, Storage, $location) {
+    return {
+      request: function (config) {
+        var userInfo = Storage.get('user');
+        config.headers = config.headers || {};
+        if (userInfo && userInfo.token) {
+          config.headers.TOKEN = userInfo.token;
+        }
+        return config;
+      },
+      response: function (response) {
+        if (response.data.code === 403) {
+          Storage.remove('user');
+          $location.path('/auth/login');
+        }
+        return response || $q.when(response);
+      }
+    };
+  })
   .factory('Auth', function ($resource, $rootScope, $q, ENV, Message, $state, Storage) {
-    var resource = $resource(ENV.TB_URL + '&do=auth,', { op: '@op' });
+    var resource = $resource(ENV.TB_URL + '&do=auth', { op: '@op' });
     //检查手机号格式
     var checkMobile = function (mobile) {
       if (!ENV.REGULAR_MOBILE.test(mobile)) {
@@ -194,4 +213,30 @@ angular.module('starter.services', [])
         });
       }
     }
+  })
+  .factory('User', function ($resource, $rootScope, $q, ENV, Message, $state, Storage) {
+    var resource = $resource(ENV.TB_URL + '&do=user', { op: '@op' });
+    return {
+      getGoodInfo: function (cid) {
+        var deferred = $q.defer();
+        resource.save({ op: 'goodInfo',cid:cid }, function (response) {
+          if(response.code == 0){
+            deferred.resolve(response.data);
+          }else {
+            Message.show(response.msg)
+            deferred.reject();
+          }
+          
+        });
+        return deferred.promise;
+      }
+    }
+  })
+  .factory('Order',function($resource, $rootScope, $q, ENV, Message, $state, Storage){
+      var resource = $resource(ENV.TB_URL + '&do=order', { op: '@op' });
+      return {
+        create:function(orderInfo){
+
+        }
+      }
   })

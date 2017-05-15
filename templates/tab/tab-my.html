@@ -1,0 +1,107 @@
+<ion-view view-title="个人中心" hide-nav-bar="true" hide-back-button="true">
+    <ion-header-bar class="bar-assertive header-back" style="height:40px;">
+        <div class="buttons" ui-sref="user.center">
+            <button class="button iconfont icon-shezhi button-clear button-icon-size" style="padding-left:14px;font-size:24px;"></button>
+        </div>
+        <h1 class="title">个人中心</h1>
+    </ion-header-bar>
+    <ion-content class="bodybg-normal" style="top:40px;">
+        <div class="my-header">
+            <div class="mobile">
+                <i class="iconfont icon-geren2" style="padding:10px 0"></i>
+                <p>ID:{{info.uid|| '235'}}&nbsp;&nbsp;账号:{{info.mobile || '15603815316'}}</p>
+            </div>
+        </div>
+        <section class="order_center">
+            <h3><i class="iconfont icon-dingdan"></i>订单中心</h3>
+            <div class="my-order orderlist-head">
+                <ul class="clearfix">
+                    <li ng-click="select(-3)" ng-class="{'onOrder':orderStatus=='-3'}"><i class="iconfont icon-jilu"></i><span>待付款</span></li>
+                    <li ng-click="select(0)" ng-class="{'onOrder':orderStatus=='0'}"><i class="iconfont icon-pay"></i><span>待收货</span></li>
+                    <li ng-click="select(1)" ng-class="{'onOrder':orderStatus=='1'}"><i class="iconfont icon-send"></i><span>已收货</span></li>
+                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-deliver"></i><span>已完成</span></li>
+                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-dou-copy"></i><span>正返现</span></li>
+                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-woyaohuigoutubiao"></i><span>已返现</span></li>
+                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-dingdan2"></i><span>退货</span></li>
+                </ul>
+            </div>
+        </section>
+        <section class="order_center">
+            <h3><i class="iconfont icon-woyaohuigoutubiao"></i>返现中心</h3>
+            <div class="yd-love-tnum" ui-sref="user.loveInfo">
+                <ul class="clearfix">
+                    <li class="com">
+                        <span class="positive" ng-bind="totalInfo.count.love || 0"></span>
+                        <p>可返现总额</p>
+                    </li>
+                    <li class="com">
+                        <span class="positive" ng-bind="totalInfo.count.Loveing || 0"></span>
+                        <p>已返现总额</p>
+                    </li>
+                    <!--<li class="flex">
+                        <div class="flex_1">
+                            <p>激励完成的孝心</p><span class="positive" ng-bind="totalInfo.count.useLove || 0"></span>
+                        </div>
+                    </li>-->
+                    <li class="com" style="border-right:none">
+                        <span class="positive" ng-bind="totalInfo.count.Loveing || 0"></span>
+                        <p>今日返现</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="flex yd-love-exBean" ui-sref="user.totalBean({type:1})">
+                <div class="flex_1">
+                    <p><i class="iconfont icon-woyaohuigoutubiao"></i>返现明细</p>
+                </div>
+                <i class="iconfont icon-right"></i>
+            </div>
+            <div class="flex yd-love-exBean" ui-sref="user.totalBean({type:1})">
+                <div class="flex_1">
+                    <p><i class="iconfont icon-woyaohuigoutubiao"></i>我要提现</p>
+                </div>
+                <i class="iconfont icon-right"></i>
+            </div>
+        </section>
+        <section class="order_center">
+            <h3><i class="iconfont icon-woyaohuigoutubiao"></i>推荐中心</h3>
+            <div class="yd-love-tnum" ui-sref="user.loveInfo">
+                <ul class="clearfix">
+                    <li class="com">
+                        <span class="positive" ng-bind="totalInfo.count.love || 0"></span>
+                        <p>推荐总人数</p>
+                    </li>
+                    <li class="com">
+                        <span class="positive" ng-bind="totalInfo.count.Loveing || 0"></span>
+                        <p>推荐总收益</p>
+                    </li>
+                    <!--<li class="flex">
+                        <div class="flex_1">
+                            <p>激励完成的孝心</p><span class="positive" ng-bind="totalInfo.count.useLove || 0"></span>
+                        </div>
+                    </li>-->
+                    <li class="com" style="border-right:none">
+                        <span class="positive" ng-bind="totalInfo.count.Loveing || 0"></span>
+                        <p>今日返现</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="flex yd-love-exBean" ui-sref="user.totalBean({type:1})">
+                <div class="flex_1">
+                    <p><i class="iconfont icon-woyaohuigoutubiao"></i>推荐人数详情</p>
+                </div>
+                <i class="iconfont icon-right"></i>
+            </div>
+            <div class="flex yd-love-exBean" ui-sref="user.totalBean({type:1})">
+                <div class="flex_1">
+                    <p><i class="iconfont icon-woyaohuigoutubiao"></i>推荐收益详情</p>
+                </div>
+                <i class="iconfont icon-right"></i>
+            </div>
+        </section>
+
+
+
+
+
+
+    </ion-content>

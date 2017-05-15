@@ -81,7 +81,7 @@ angular.module('starter.controllers', [])
 
 
   })
-  .controller('loginCtrl', function ($rootScope, $scope, $ionicModal, $state, Message) {
+  .controller('loginCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, Auth) {
     $scope.agree = true;
     $scope.authAgree = function () {
       $scope.agree = !$scope.agree;
@@ -107,10 +107,12 @@ angular.module('starter.controllers', [])
         Message.show('请勾选会员注册协议')
         return false;
       }
+      Auth.login($scope.login.mobile, $scope.login.password);
     }
 
   })
-  .controller('registerCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, ENV, $interval) {
+  .controller('registerCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, ENV, $interval, Auth) {
+    console.log('registers')
     $scope.reg = {
       step: 1,
       tMobile: '',
@@ -123,6 +125,7 @@ angular.module('starter.controllers', [])
       number: 60,
       bol: false
     }
+
     //会员注册协议
     $ionicModal.fromTemplateUrl('templates/modal/single-page.html', {
       scope: $scope,
@@ -190,9 +193,9 @@ angular.module('starter.controllers', [])
       $scope.reg.step = 3;
     })
   })
-  .controller('goodInfoCtrl', function ($rootScope, $scope, $stateParams) {
-    $scope.rank = $stateParams.role;
-    $scope.rankStatus = {
+  .controller('goodInfoCtrl', function ($rootScope, $scope, $stateParams, User) {
+    $scope.cid = $stateParams.role;
+    $scope.cidStatus = {
       '1': '金牌',
       '2': '铜牌',
       '3': '银牌'
@@ -200,7 +203,9 @@ angular.module('starter.controllers', [])
     $scope.info = {
       num: 1
     }
-
+    User.getGoodInfo($scope.cid).then(function (data) {
+      $scope.info = data;
+    })
     $scope.slideImgs = [
       {
         src: 'http://img.zcool.cn/community/01f20b580dc026a84a0e282bace64b.jpg@900w_1l_2o_100sh.jpg'
@@ -241,7 +246,7 @@ angular.module('starter.controllers', [])
           $scope.payInfo.img = "data:image/jpeg;base64," + imageURI;
           var image = document.getElementById('divImg');
           image.style.backgroundImage = "url(data:image/jpeg;base64," + imageURI + ")";
-          image.setAttribute('class','on')
+          image.setAttribute('class', 'on')
         }, function (error) {
           console.log('失败原因：' + error);
           Message.show('选择失败,请重试.', 1000);
@@ -280,10 +285,30 @@ angular.module('starter.controllers', [])
       $scope.orderImg = modal;
     })
     $scope.showOrder = function () {
-   
+
       $scope.orderImg.show()
     }
 
+  })
+  .controller('userPayCtrl', function ($scope, $rootScope) {
+    $scope.payType = 'credit';
+    $scope.selectPayType = function (type) {
+      $scope.payType = type;
+    };
+    $scope.orderConfirm = function () {
+      if ($scope.payType == 'wechat') {
+        //noinspection JSUnresolvedVariable
+        console.log('weixin')
+        if (!window.Wechat) {
+          alert("暂不支持微信支付！");
+          return false;
+        }
+        Payment.wechatPay(model);
+      } else if ($scope.payType == 'alipay') {
+        console.log('支付宝')
+        alert("证书尚未配置，请用微信支付！");
+      }
+    };
   })
 
 

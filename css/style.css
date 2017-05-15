@@ -419,3 +419,113 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 .yd-user-vouchcer img{
 	max-width:80vw;
 }
+/*我的*/
+.my-header{
+	height:70px;
+	background: #fe5400;
+}
+.my-header .mobile{
+	text-align: center;
+	color: #fff;
+}
+.my-header .mobile i{
+	display: inline-block;
+	font-size:30px;
+	color:#fff;
+	padding:20px 0;
+}
+.order_center {
+	margin: 10px 0;
+	background: #fff;
+	padding: 0 10px;
+}
+.order_center h3 {
+	font-size:16px;
+	padding: 10px 0;
+	margin: 0;
+	text-align: center;
+	border-bottom: 1px solid #ccc;
+	margin-bottom: 10px;
+}
+.order_center h3 i{
+	margin-right:5px
+}
+.order_center .my-order ul li {
+float: left;
+width: 25%;
+text-align: center;
+padding: 5px 0;
+}
+.order_center .my-order ul li i {
+		font-size: 25px;
+		color: #de4a00;
+}
+.order_center .my-order ul li span {
+	display: block;
+}
+.yd-love-tnum{
+	padding:0 10px 10px 0;
+	border-bottom:1px solid #eaeaea;
+}
+.yd-love-tnum li{
+	float: left;
+	text-align: center;
+}
+.yd-love-tnum li p{
+	margin:0;
+}
+.yd-love-tnum li.com{
+	width:33.33%;
+	border-right:1px dashed #eaeaea;
+}
+.yd-love-exBean{
+	padding:5px;
+}
+.yd-love-exBean i{
+	font-size:18px;
+	color: #7d7d7d;
+	line-height: 30px;
+	margin-right: 5px;
+}
+.yd-love-exBean p{
+	margin:0;
+}
+.co-pay>div{
+	font-size:15px;
+	font-weight: normal;
+	line-height: 40px;
+	padding: 0 10px;
+}
+.co-pay>ul li{
+	background: #fff;
+	padding: 10px 20px;
+	border-bottom: 1px solid #E6E6E6;
+}
+.co-pay>ul li img{
+	width: 40px;
+	height: 40px;
+}
+.co-pay .co-pay-info{
+	padding: 0 10px;
+}
+.co-pay .co-pay-info h4{
+	line-height: 20px;
+	font-size: 14px;
+	margin: 0;
+}
+.co-pay .co-pay-info p{
+	line-height: 20px;
+	font-size: 12px;
+	color:#aaa;
+	margin: 0;
+}
+.co-pay>ul li >i{
+	font-size: 30px;
+	line-height: 40px;
+	color: #aaa;
+}
+.co-pay>ul li >i.checked{
+	font-size: 30px;
+	line-height: 40px;
+	color: #f5a623;
+}

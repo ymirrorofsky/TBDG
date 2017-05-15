@@ -61,10 +61,17 @@ angular.module('starter.routes', [])
                 templateUrl: 'templates/user/createOrder.html',
                 controller: 'createOrderCtrl'
             })
+            .state('user.pay', {
+                url: '/pay',
+                cache: false,
+                // params: { orderId: null, spid: null, payPrice: null },
+                templateUrl: 'templates/user/pay.html',
+                controller: 'userPayCtrl'
+            })
 
 
 
 
-        $urlRouterProvider.otherwise('/tab/home');
+        $urlRouterProvider.otherwise('/auth/login');
 
     })

@@ -13,29 +13,30 @@
             </ion-slide>
         </ion-slide-box>
         <section class="goods-info">
-            <article>人间失格</article>
+            <article ng-bind="info.goodsName">人间失格</article>
             <div class="price">
-                <b>¥<span id="main_price">9.80</span></b>
-                <b class="rank">会员级别<span ng-bind="rankStatus[rank]">金牌</span></b>
+                <b>¥<span id="main_price" ng-bind="info.price">9.80</span></b>
+                <b class="rank">会员级别<span ng-bind="cidStatus[cid]">金牌</span></b>
             </div>
         </section>
         <section class="goods-intro">
             <h2>商品详情</h2>
+            <div ng-bind-html="info.goodsDesc"></div>
         </section>
     </ion-content>
     <ion-footer-bar class="buy_footer">
         <section class="shopping">
-            <div class="quantity">
+            <!--<div class="quantity">
                 <h4>数量：</h4>
                 <div class="number_con">
                     <span class="minus" ng-click="reduce()"><i class="iconfont icon-move"></i></span>
-                    <!--<input id="buy_num" type="text" value="1">-->
+                    <input id="buy_num" type="text" value="1">
                     <input type="text" ng-model="info.num">
                     <span class="plus" ng-click="add()"><i class="iconfont icon-add"></i></span>
                 </div>
-            </div>
+            </div>-->
             <div class="btn_con">
-                <button class="buy_now">立即购买</button>
+                <button class="buy_now" ui-sref='user.pay'>立即购买</button>
             </div>
         </section>
     </ion-footer-bar>
