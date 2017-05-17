@@ -1,4 +1,18 @@
 /* Empty. Add your own CSS if you like */
+html{font-size:10px}
+@media screen and (min-width:321px) and (max-width:375px){html{font-size:13px}}
+@media screen and (min-width:376px) and (max-width:414px){html{font-size:14px}}
+@media screen and (min-width:415px) and (max-width:639px){html{font-size:15px}}
+@media screen and (min-width:640px) and (max-width:719px){html{font-size:20px}}
+@media screen and (min-width:720px) and (max-width:749px){html{font-size:22.5px}}
+@media screen and (min-width:750px) and (max-width:799px){html{font-size:23.5px}}
+@media screen and (min-width:800px){html{font-size:25px}}
+
+body {
+	font-size: 1rem;
+}
+
+
 .bar.bar-assertive {
     background-color: #FE5400
 }
@@ -369,6 +383,33 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 	display: block;
 	line-height:33px;
 }
+.real-count li .common{
+	padding-left: 65px;
+}
+.real-count li .sex span{
+	margin-right:10px;
+	display: inline-flex;
+}
+.real-count li .sex em{
+	line-height: 37px;
+}
+.real-count li .sex span i{
+	font-size:20px;
+	margin-right:5px;
+	color: #7d7d7d;
+}
+ .real-count li .sex span i.ion-ios-circle-filled{
+	 color: #ff6600;
+ }
+ .real-count li .btn{
+	position: absolute;
+	right: 10px;
+	top: 4px;
+	line-height: 32px;
+	border-radius: 5px;
+	padding: 0 10px;
+	font-size: 14px;
+}
 .yd-add-img{
 	padding:5px 10px 10px;
 }
@@ -527,5 +568,84 @@ padding: 5px 0;
 .co-pay>ul li >i.checked{
 	font-size: 30px;
 	line-height: 40px;
-	color: #f5a623;
+	color: #fe5400;
 }
+/*商家订单列表*/
+.shop-order-list li{
+	border-bottom:1px solid #eaeaea;
+	line-height:25px;
+	background: #fff;
+}
+.shop-order-list li a{
+	display: block;
+	padding:10px;
+	color: #000;
+	text-decoration: none;
+}
+.shop-order-list li p{
+	margin:0;
+}
+.yd-shops-order{
+	padding:10px 0 0;
+	margin-bottom:15px;
+	background: #FFF;
+	border-bottom:1px solid #eaeaea;
+}
+.yd-shops-order p{
+	padding:0 16px;
+	font-size:15px;
+}
+.yd-shops-order h3{
+	font-size:16px;
+	padding:0 16px;
+	border-top:1px solid #eaeaea;
+	margin:0;
+	line-height:40px;
+}
+.t_mess_list {
+	margin-top: 10px;
+	background-color: #fff;
+}
+.t_mess_list li {
+	height: 50px;
+	line-height: 50px;
+	border-bottom: 1px #F0F0EF solid;
+}
+.t_mess_list li a {
+	padding: 0 15px;
+}
+.t_mess_list li b {
+	font-size: 20px;
+}
+.t_mess_list li i {
+	color: #666;
+	font-size: 20px;
+}
+.t_mess_list li:last-child {
+	border-bottom: none;
+}
+.t_mess_list h3 {
+	margin: 0;
+	line-height: 50px;
+	font-size: 14px;
+	color: #000;
+	padding: 0 10px;
+}
+/*忘记支付密码*/
+.forget_psd{
+	font-size:15px;
+	color:#ef4e3a;
+	text-align:right;
+	margin-top:8px;
+	padding-right:7px;
+}
+.yd-pay-voucher{
+	text-align: center;
+	font-size:16px;
+	color: #A2A2A2;
+}
+.yd-pay-voucher span{
+	display: inline-flex;
+	padding:3px 10px;
+}
+

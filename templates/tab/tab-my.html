@@ -16,13 +16,13 @@
             <h3><i class="iconfont icon-dingdan"></i>订单中心</h3>
             <div class="my-order orderlist-head">
                 <ul class="clearfix">
-                    <li ng-click="select(-3)" ng-class="{'onOrder':orderStatus=='-3'}"><i class="iconfont icon-jilu"></i><span>待付款</span></li>
-                    <li ng-click="select(0)" ng-class="{'onOrder':orderStatus=='0'}"><i class="iconfont icon-pay"></i><span>待收货</span></li>
-                    <li ng-click="select(1)" ng-class="{'onOrder':orderStatus=='1'}"><i class="iconfont icon-send"></i><span>已收货</span></li>
-                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-deliver"></i><span>已完成</span></li>
-                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-dou-copy"></i><span>正返现</span></li>
-                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-woyaohuigoutubiao"></i><span>已返现</span></li>
-                    <li ng-click="select(2)" ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-dingdan2"></i><span>退货</span></li>
+                    <li ui-sref='user.orderList({type:1})' ng-class="{'onOrder':orderStatus=='1'}"><i class="iconfont icon-jilu"></i><span>待付款</span></li>
+                    <li ui-sref='user.orderList({type:2})' ng-class="{'onOrder':orderStatus=='2'}"><i class="iconfont icon-pay"></i><span>待收货</span></li>
+                    <li ui-sref='user.orderList({type:3})' ng-class="{'onOrder':orderStatus=='3'}"><i class="iconfont icon-send"></i><span>已收货</span></li>
+                    <li ui-sref='user.orderList({type:5})' ng-class="{'onOrder':orderStatus=='5'}"><i class="iconfont icon-deliver"></i><span>已完成</span></li>
+                    <li ui-sref='user.orderList({type:6})' ng-class="{'onOrder':orderStatus=='6'}"><i class="iconfont icon-dou-copy"></i><span>正返现</span></li>
+                    <li ui-sref='user.orderList({type:7})' ng-class="{'onOrder':orderStatus=='7'}"><i class="iconfont icon-woyaohuigoutubiao"></i><span>已返现</span></li>
+                    <li ui-sref='user.orderList({type:4})' ng-class="{'onOrder':orderStatus=='4'}"><i class="iconfont icon-dingdan2"></i><span>退货</span></li>
                 </ul>
             </div>
         </section>
@@ -94,6 +94,12 @@
             <div class="flex yd-love-exBean" ui-sref="user.totalBean({type:1})">
                 <div class="flex_1">
                     <p><i class="iconfont icon-woyaohuigoutubiao"></i>推荐收益详情</p>
+                </div>
+                <i class="iconfont icon-right"></i>
+            </div>
+            <div class="flex yd-love-exBean" ui-sref="user.totalBean({type:1})">
+                <div class="flex_1">
+                    <p><i class="iconfont icon-woyaohuigoutubiao"></i>推荐收益提现</p>
                 </div>
                 <i class="iconfont icon-right"></i>
             </div>

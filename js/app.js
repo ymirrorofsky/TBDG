@@ -1,5 +1,5 @@
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'starter.services', 'starter.directives', 'ngCordova', 'ngResource'])
-  .run(function ($rootScope, $ionicPlatform, Storage) {
+  .run(function ($rootScope, $ionicPlatform, Storage, $cordovaSplashscreen, $location, $ionicHistory, $interval) {
     $ionicPlatform.ready(function () {
       if (window.cordova && window.cordova.plugins && window.cordova.plugins.keyboard) {
         cordova.plugins.keyboard.hideKeyboardAccessoryBar(true);
@@ -10,14 +10,53 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
       }
     })
 
-    		// 初始化全局变量
-		$rootScope.globalInfo = {
-			user: (function() {
-				return Storage.get('user') || {
-					uid: false,
-				}
-			})()
-		};
+    // 初始化全局变量
+    $rootScope.globalInfo = {
+      user: (function () {
+        return Storage.get('user') || {
+          uid: false,
+        }
+      })()
+    };
+
+    // cordova初始化后的操作
+    document.addEventListener("deviceready", function () {
+      //退出启动画面
+      setTimeout(function () {
+        try {
+          $cordovaSplashscreen.hide();
+        } catch (e) {
+          console.info(e);
+        }
+      }, 700);
+    }, false);
+
+    //退出
+    var exit = false;
+    $ionicPlatform.registerBackButtonAction(function (e) {
+      if ($location.path() == '/tab/home') {
+        if (exit) {
+          ionic.Platform.exitApp();
+        } else {
+          console.log(1111);
+          exit = true;
+          Message.show('再按一次退出系统', "1000");
+          setTimeout(function () {
+            exit = false;
+          }, 2000);
+        }
+      } else if ($ionicHistory.backView()) {
+        $ionicHistory.goBack();
+      } else {
+        exit = true;
+        Message.show('再按一次退出系统', "1000");
+        setTimeout(function () {
+          exit = false;
+        }, 2000);
+      }
+      e.preventDefault();
+      return false;
+    }, 101);
 
   })
   .constant('ENV', {
@@ -35,7 +74,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
     $ionicConfigProvider.platform.android.backButton.previousTitleText('').icon('ion-android-arrow-back');
     $ionicConfigProvider.views.transition('no')
   })
-   
+
   .config(function ($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider) {
     $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
     $httpProvider.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';

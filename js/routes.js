@@ -8,7 +8,7 @@ angular.module('starter.routes', [])
             })
             .state('tab.home', {
                 url: '/home',
-                cache: false,
+                cache:false,
                 views: {
                     'tab-home': {
                         templateUrl: 'templates/tab/tab-home.html',
@@ -68,10 +68,44 @@ angular.module('starter.routes', [])
                 templateUrl: 'templates/user/pay.html',
                 controller: 'userPayCtrl'
             })
+            .state('user.orderList', {
+                url: '/orderList',
+                cache: false,
+                params: { type: null },
+                templateUrl: 'templates/user/orderList.html',
+                controller: 'userOrderListCtrl'
+            })
+            .state('user.orderInfo', {
+                url: '/orderInfo/:orderId',
+                cache: false,
+                params: { orderId: null, type: null },
+                templateUrl: 'templates/user/orderInfo.html',
+                controller: 'userOrderInfoCtrl'
+            })
+            .state('user.center', {
+                url: '/center',
+                templateUrl: 'templates/user/center.html',
+                controller: 'userCenterCtrl'
+            })
+            .state('user.realName', {
+                url: '/realName',
+                cache: false,
+                templateUrl: 'templates/user/realName.html',
+                controller: 'userRealNameCtrl'
+            })
+            .state('user.loginPsw', {
+                url: '/loginPsw/:type',
+                params: {
+                    type: null
+                },
+                cache: false,
+                templateUrl: 'templates/user/loginPsw.html',
+                controller: 'userLoginPswCtrl'
+            })
 
 
 
 
-        $urlRouterProvider.otherwise('/auth/login');
+        $urlRouterProvider.otherwise('/tab/home');
 
     })

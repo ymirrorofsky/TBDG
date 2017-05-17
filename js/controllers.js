@@ -1,6 +1,17 @@
 angular.module('starter.controllers', [])
 
-  .controller('homeCtrl', function ($scope, Storage) {
+  .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate) {
+
+    User.getHome().then(function (data) {
+      console.log('返回成功')
+      $scope.info = data;
+      if ($scope.info.banner) {
+        $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
+      }
+    })
+
+
+
     $scope.slideImgs = [
       {
         src: 'http://img.zcool.cn/community/01f20b580dc026a84a0e282bace64b.jpg@900w_1l_2o_100sh.jpg'
@@ -73,7 +84,22 @@ angular.module('starter.controllers', [])
         title: '天猫'
       }
     ]
+    $scope.createOrder = function () {
+      if ($rootScope.globalInfo.user.role == 0) {
+        console.log('role==0')
+        var alertPopup = $ionicPopup.alert({
+          title: '提示',
+          template: '该账号不能下单，请先购买会员商品',
+          okText: '确定'
+        });
+        alertPopup.then(function (res) {
+          return false;
+        });
+      } else {
+        $state.go('user.createOrder')
+      }
 
+    }
 
   })
 
@@ -197,8 +223,8 @@ angular.module('starter.controllers', [])
     $scope.cid = $stateParams.role;
     $scope.cidStatus = {
       '1': '金牌',
-      '2': '铜牌',
-      '3': '银牌'
+      '2': '银牌',
+      '3': '铜牌'
     }
     $scope.info = {
       num: 1
@@ -219,13 +245,14 @@ angular.module('starter.controllers', [])
     ];
 
   })
-  .controller('createOrderCtrl', function ($scope, $rootScope, $cordovaCamera, $ionicActionSheet, $ionicModal) {
+  .controller('createOrderCtrl', function ($scope, $rootScope, $cordovaCamera, $ionicActionSheet, $ionicModal, ENV, Order, $state) {
     /*上传支付凭证*/
     $scope.payInfo = {
       goodName: '',
-      goodPrice: '',
-      phone: '',
-      img: ''
+      price: '',
+      mobile: '',
+      img: '',
+      message: ''
     };
     var selectImages = function (from) {
       var options = {
@@ -289,9 +316,32 @@ angular.module('starter.controllers', [])
       $scope.orderImg.show()
     }
 
+    $scope.sureSubmit = function () {
+      console.log('nihaoa')
+      if (!$scope.payInfo.goodName) {
+        Message.show("商品名称不能为空！");
+        return false;
+      }
+      if (!$scope.payInfo.price) {
+        Message.show("商品价格不能为空！");
+        return false;
+      }
+      if (!$scope.payInfo.mobile || !ENV.REGULAR_MOBILE.test($scope.payInfo.mobile)) {
+        Message.show("收货人联系方式！");
+        return false;
+      }
+      // if (!$scope.payInfo.img) {
+      //   Message.show("订单凭证不能为空！");
+      //   return false;
+      // }
+      Order.create($scope.payInfo).then(function (data) {
+        $state.go('user.orderInfo', { orderId: data.orderId, type: 1 })
+      })
+    }
+
   })
   .controller('userPayCtrl', function ($scope, $rootScope) {
-    $scope.payType = 'credit';
+    $scope.payType = 'alipay';
     $scope.selectPayType = function (type) {
       $scope.payType = type;
     };
@@ -310,5 +360,196 @@ angular.module('starter.controllers', [])
       }
     };
   })
+  .controller('userOrderListCtrl', function ($scope, $rootScope, $stateParams, Order, $ionicModal) {
+    $scope.orderStatus = {
+      '1': '待付款',
+      '2': '待收货',
+      '3': '已收货',
+      '4': '退货',
+      '5': '已完成',
+      '6': '正返现',
+      '7': '已返完',
+    }
+    $scope.orderEmpty = false;
+    $scope.type = $stateParams.type;
+    Order.getList($scope.type).then(function (data) {
+      console.log('nininini')
+      if (data == '' || data.length == 0) {
+
+        $scope.orderEmpty = true;
+      } else {
+        $scope.orderEmpty = false;
+        $scope.orderList = data;
+      }
+    });
+
+
+
+  })
+  .controller('userOrderInfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal) {
+    $scope.orderStatus = {
+      '1': '待付款',
+      '2': '待收货',
+      '3': '以收货',
+      '4': '退货',
+      '5': '已完成',
+      '6': '正返现',
+      '7': '已返完',
+    }
+    Order.getInfo($stateParams.orderId).then(function (response) {
+      $scope.orderInfo = response.data
+      if($scope.orderInfo.thumb){
+        $scope.payInfo.img=$scope.orderInfo.thumb
+      }
+      // if ($scope.orderInfo.status == 3) {
+      //   if ($scope.orderInfo.timeout) {
+
+      //   }
+      // }
+    })
+    $scope.sureGet = function () {
+      Order.sureGet($stateParams.orderId).then(function (data) {
+        $state.go('user.orderList', ({ type: 3 }))
+      })
+    }
+    $scope.sureFinish = function () {
+      Order.sureFinish($stateParams.orderId).then(function (data) {
+        $state.go('user.orderList', ({ type: 5 }))
+      })
+    }
+    $ionicModal.fromTemplateUrl('templates/modal/showOrder.html', {
+      scope: $scope,
+      animation: 'slide-in-right'
+    }).then(function (modal) {
+      $scope.orderImg = modal;
+    })
+    $scope.showOrder = function () {
+      $scope.orderImg.show()
+    }
+
+
+  })
+  .controller('userCenterCtrl', function ($scope, $rootScope, $stateParams, User, $state, $ionicActionSheet, $ionicHistory, $ionicLoading, $timeout) {
+    // 退出登录
+    $scope.logout = function () {
+      $ionicActionSheet.show({
+        destructiveText: '退出登录',
+        titleText: '确定退出当前登录账号吗？',
+        cancelText: '取消',
+        cancel: function () {
+          return true;
+        },
+        destructiveButtonClicked: function () {
+          User.logout();
+          $ionicHistory.nextViewOptions({ //退出后清除导航的返回
+            disableBack: true
+          });
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '退出成功！',
+            duration: '1500'
+          });
+          $timeout(function () {
+            $state.go('auth.login');
+          }, 1200);
+          return true;
+        }
+      });
+    };
+  })
+  .controller('userRealNameCtrl', function ($scope, $rootScope, $stateParams, User, $state) {
+    $scope.info = {
+      realname: '',
+      gender: 1,
+    };
+    // $scope.getCaptchaSuccess = false;
+    $scope.personalSuccess = false;
+    $scope.select = function (type) {
+      $scope.info.gender = type;
+    };
+    $scope.sex = {
+      1: '男',
+      2: '女'
+    }
+    User.getSettingInfo().then(function (data) {
+      if (data.realname == '') {
+        $scope.info = {
+          realname: '',
+          gender: 1,
+        };
+        return false;
+      }
+      $scope.personalSuccess = true;
+      $scope.info = data
+    })
+    $scope.submit = function () {
+      var info = {
+        realname: $scope.info.realname,
+        gender: $scope.info.gender,
+      };
+      if (!$scope.info.realname || $scope.info.realname.length <= 1) {
+        Message.show('请输入真实姓名！');
+        return false;
+      }
+      User.settingInfo(info).then(function (data) {
+        $state.go("user.realName")
+      })
+    }
+  })
+  .controller('userLoginPswCtrl', function ($scope, $stateParams, Message, User, $interval) {
+    $scope.type = $stateParams.type;
+    $scope.getCaptchaSuccess = false;
+    $scope.pageData = {
+      oldpsd: '',
+      code: '',
+      newpsd: '',
+      respsd: ''
+    };
+    $scope.reg = {
+      number: 60
+    };
+    // 获取修改登录或支付验证码
+    $scope.getCode = function (oldpsd, newpsd, respsd, type) {
+      if (oldpsd.length < 6 || newpsd.length < 6 || respsd.length < 6) {
+        Message.show('请输入至少6位的密码');
+        return;
+      } else if (newpsd != respsd) {
+        Message.show('两次密码不一致');
+        return;
+      }
+      User.getCaptcha(oldpsd, newpsd, respsd, type).then(function (data) {
+        $scope.getCaptchaSuccess = true;
+        var timer = $interval(function () {
+          if ($scope.reg.number <= 1) {
+            $interval.cancel(timer);
+            $scope.getCaptchaSuccess = false;
+            $scope.reg.number = 60;
+          } else {
+            $scope.reg.number--;
+          }
+        }, 1000)
+      })
+    };
+    $scope.savePsd = function (oldpsd, code, newpsd, respsd) {
+      if (oldpsd.length < 6 || newpsd.length < 6 || respsd.length < 6) {
+        Message.show('请输入至少6位的密码');
+        return;
+      } else if (newpsd != respsd) {
+        Message.show('两次密码不一致');
+        return;
+      }
+      else if (code.length < 4) {
+        Message.show('请输入正确的验证码');
+        return;
+      }
+      if ($scope.type == 1) {
+        User.changeLoginPsd(oldpsd, code, newpsd, respsd);
+      } else if ($scope.type == 2) {
+        User.changePayPsd(oldpsd, code, newpsd, respsd);
+      }
+    }
+
+  })
+
 
 

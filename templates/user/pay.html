@@ -9,24 +9,23 @@
 		<div class="co-pay">
 			<div>支付方式</div>
 			<ul>
-				<li class="flex" ng-click="selectPayType('wechat')">
-					<img src="img/wechat_pay.png"/>
-					<div class="co-pay-info flex_1">
-						<h4>微信支付</h4>
-						<p>亿万用户选择，更快更安全</p>
-					</div>
-					<i class="iconfont"
-					   ng-class="{'icon-roundcheckfill checked': payType == 'wechat', 'icon-round': payType != 'wechat'}"></i>
-				</li>
 				<li class="flex" ng-click="selectPayType('alipay')">
-					<img src="img/ali_logo.png"/>
+					<img src="img/ali_logo.png" />
 					<div class="co-pay-info flex_1">
 						<h4>支付宝</h4>
 						<p>数亿用户都在使用，安全可托付</p>
 					</div>
-					<i class="iconfont "
-					   ng-class="{'icon-roundcheckfill checked': payType == 'alipay', 'icon-round': payType != 'alipay'}"></i>
+					<i class="iconfont " ng-class="{'icon-roundcheckfill checked': payType == 'alipay', 'icon-round': payType != 'alipay'}"></i>
 				</li>
+				<li class="flex" ng-click="selectPayType('wechat')">
+					<img src="img/wechat_pay.png" />
+					<div class="co-pay-info flex_1">
+						<h4>微信支付</h4>
+						<p>亿万用户选择，更快更安全</p>
+					</div>
+					<i class="iconfont" ng-class="{'icon-roundcheckfill checked': payType == 'wechat', 'icon-round': payType != 'wechat'}"></i>
+				</li>
+
 			</ul>
 		</div>
 		<button class="button button-block button-assertive zl_btn_center" ng-click="orderConfirm()">确定</button>

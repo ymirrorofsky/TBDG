@@ -114,6 +114,7 @@ angular.module('starter.services', [])
             Message.show('登陆成功', 1000);
             Storage.set("user", response.data);
             $rootScope.globalInfo.user = response.data;
+            console.log($rootScope.globalInfo.user)
             $state.go('tab.home');
           } else {
             Message.show(response.msg, 1500);
@@ -217,26 +218,269 @@ angular.module('starter.services', [])
   .factory('User', function ($resource, $rootScope, $q, ENV, Message, $state, Storage) {
     var resource = $resource(ENV.TB_URL + '&do=user', { op: '@op' });
     return {
+      checkAuth: function () {
+        return (Storage.get('user') && Storage.get('user').uid != '');
+      },
+      /*退出登录*/
+      logout: function () {
+        Storage.remove('user');
+        $rootScope.globalInfo.user = { uid: false };
+        Message.show('退出成功！', '1500', function () {
+
+        });
+      },
+      getHome: function () {
+        var deferred = $q.defer();
+        Message.loading();
+        resource.save({ op: 'getHome' }, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
       getGoodInfo: function (cid) {
         var deferred = $q.defer();
-        resource.save({ op: 'goodInfo',cid:cid }, function (response) {
-          if(response.code == 0){
+        resource.save({ op: 'goodInfo', cid: cid }, function (response) {
+          if (response.code == 0) {
             deferred.resolve(response.data);
-          }else {
+          } else {
             Message.show(response.msg)
             deferred.reject();
           }
-          
+
         });
         return deferred.promise;
-      }
+      },
+      getSettingInfo: function () {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'getSettingInfo',
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      settingInfo: function (info) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'settingInfo',
+          realName: info.realname,
+          gender: info.gender
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+            Message.show(response.msg);
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      // 修改登录及支付密码 获取验证码
+      getCaptcha: function (oldpsd, newpsd, respsd, type) {
+        var _json = {};
+        Message.loading();
+        var deferred = $q.defer();
+        if (type == 1) {
+          _json = {
+            op: 'updatePassword',
+            type: 'send',
+            userPassword: oldpsd,
+            password: newpsd,
+            repassword: respsd
+          }
+        } else if (type == 2) {
+          _json = {
+            op: 'updatePayPassword',
+            type: 'send',
+            userPassword: oldpsd,
+            password: newpsd,
+            repassword: respsd
+          }
+        }
+        resource.save(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+            Message.show(response.msg);
+          } else {
+            Message.show(response.msg);
+          }
+        }, function () {
+          Message.show('通信错误，请检查网络!', 1500);
+        });
+        return deferred.promise;
+      },
+      // 修改登录密码
+      changeLoginPsd: function (oldpsd, code, newpsd, respsd) {
+        Message.loading();
+        var deferred = $q.defer();
+        var _json = {
+          op: 'updatePassword',
+          userPassword: oldpsd,
+          code: code,
+          password: newpsd,
+          repassword: respsd
+        };
+        resource.save(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+            Message.show(response.msg);
+          } else if (response.code == 301) {
+            Message.show(response.msg);
+            $state.go('user.center');
+          } else {
+            Message.show(response.msg);
+          }
+        }, function () {
+          Message.show('通信错误，请检查网络!', 1500);
+        });
+        return deferred.promise;
+      },
+      // 修改支付密码
+      changePayPsd: function (oldpsd, code, newpsd, respsd) {
+        Message.loading();
+        var deferred = $q.defer();
+        var _json = {
+          op: 'updatePayPassword',
+          userPassword: oldpsd,
+          code: code,
+          password: newpsd,
+          repassword: respsd
+        };
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else if (response.code == 301) {
+            Message.show(response.msg);
+            $state.go('user.center');
+          } else {
+            Message.show(response.msg);
+          }
+        }, function () {
+          Message.show('通信错误，请检查网络!', 1500);
+        });
+        return deferred.promise;
+      },
     }
   })
-  .factory('Order',function($resource, $rootScope, $q, ENV, Message, $state, Storage){
-      var resource = $resource(ENV.TB_URL + '&do=order', { op: '@op' });
-      return {
-        create:function(orderInfo){
+  .factory('Order', function ($resource, $rootScope, $q, ENV, Message, $state, Storage) {
+    var resource = $resource(ENV.TB_URL + '&do=order', { op: '@op' });
+    return {
 
+      create: function (payInfo) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'create',
+          goodsName: payInfo.goodName,
+          price: payInfo.price,
+          mobile: payInfo.mobile,
+          img: payInfo.img,
+          message: payInfo.message,
         }
+        resource.save(_json, function (response) {
+          if (response.code == 0) {
+
+            Message.show(response.msg)
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg)
+            deferred.reject();
+          }
+
+        });
+        return deferred.promise;
+      },
+      getList: function (type, page) {
+        var deferred = $q.defer();
+        page = page || 1;
+        var _json = {
+          op: 'getList',
+          type: type,
+          page: page
+        };
+        Message.loading();
+        resource.save(_json, function (response) {
+          Message.hidden();
+          console.log(response);
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+            deferred.reject();
+          }
+
+        });
+        return deferred.promise;
+      },
+      getInfo: function (orderId) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'getInfo',
+          orderId: orderId,
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response);
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      //确认shouh
+      sureGet: function (orderId) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'sureGet',
+          orderId: orderId,
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve();
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        })
+        return deferred.promise;
+      },
+      sureFinish: function (orderId) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'sureFinish',
+          orderId: orderId,
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve();
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        })
+        return deferred.promise;
       }
+
+    }
   })
