@@ -8,7 +8,7 @@ angular.module('starter.routes', [])
             })
             .state('tab.home', {
                 url: '/home',
-                cache:false,
+                // cache: false,
                 views: {
                     'tab-home': {
                         templateUrl: 'templates/tab/tab-home.html',
@@ -18,7 +18,7 @@ angular.module('starter.routes', [])
             })
             .state('tab.my', {
                 url: '/my',
-                cache: false,
+                // cache: false,
                 views: {
                     'tab-my': {
                         templateUrl: 'templates/tab/tab-my.html',
@@ -42,6 +42,12 @@ angular.module('starter.routes', [])
                 cache: false,
                 templateUrl: 'templates/auth/register.html',
                 controller: 'registerCtrl'
+            })
+            .state('auth.resetPsd', {
+                url: '/resetPsd',
+                cache: false,
+                templateUrl: 'templates/auth/resetPsd.html',
+                controller: 'resetPsdCtrl'
             })
             .state('user', {
                 url: '/user',
@@ -102,10 +108,60 @@ angular.module('starter.routes', [])
                 templateUrl: 'templates/user/loginPsw.html',
                 controller: 'userLoginPswCtrl'
             })
+            .state('user.getRealMoney', {
+                url: '/getRealMoney',
+                cache: false,
+                templateUrl: 'templates/user/getRealMoney.html',
+                controller: 'userGetRealMoneyCtrl'
+            })
+            .state('user.repoList', {
+                url: '/repoList/:type',
+                params: {
+                    type: null
+                },
+                cache: false,
+                templateUrl: 'templates/user/repoList.html',
+                controller: 'userRepoListCtrl'
+            })
+            .state('user.repoInfo', {
+                url: '/repoInfo/:id',
+                params: {
+                    id: null
+                },
+                cache: false,
+                templateUrl: 'templates/user/repoInfo.html',
+                controller: 'userRepoInfoCtrl'
+            })
+            .state('user.moneyBack', {
+                url: '/moneyBack',
+                params: {
+                    type: null
+                },
+                cache: false,
+                templateUrl: 'templates/user/moneyBack.html',
+                controller: 'userMoneyBackCtrl'
+            })
+            .state('user.recPersonDetail', {
+                url: '/recPersonDetail',
+                cache: false,
+                templateUrl: 'templates/user/recPersonDetail.html',
+                controller: 'recPersonDetailCtrl'
+            })
+            .state('user.recPersonProfit', {
+                url: '/recPersonProfit',
+                cache: false,
+                templateUrl: 'templates/user/recPersonProfit.html',
+                controller: 'recPersonProfitCtrl'
+            })
+            .state('user.recBuyProfit', {
+                url: '/recBuyProfit',
+                cache: false,
+                templateUrl: 'templates/user/recBuyProfit.html',
+                controller: 'recBuyProfitCtrl'
+            })
 
 
 
-
-        $urlRouterProvider.otherwise('/tab/home');
+        $urlRouterProvider.otherwise('/auth/login');
 
     })

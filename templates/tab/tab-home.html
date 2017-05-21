@@ -3,10 +3,11 @@
         <h1 class="title">首页</h1>
     </ion-header-bar>
     <ion-content class="bodybg-normal">
+        <ion-refresher pulling-text="下拉刷新..." on-refresh="doRefresh()"></ion-refresher>
         <!--滚动轮播图-->
         <ion-slide-box delegate-handle="slideimgs" does-continue="true" show-pager="true" auto-play="true">
             <ion-slide ng-repeat="item in info.banner">
-                <a ng-href="#"><img ng-src="{{item.thumb}}" width="100%" class="banner-img" ></a>
+                <a ng-href="{{item.link}}"><img ng-src="{{item.thumb}}" width="100%" class="banner-img"></a>
             </ion-slide>
         </ion-slide-box>
         <section class="home-goods">
@@ -29,7 +30,7 @@
             <div class="buy-list" style="padding-top: 5px;">
                 <ul class="clearfix">
                     <li ng-repeat="item in info.navigation">
-                        <a ng-href="{{item.link}}" >
+                        <a ng-href="{{item.link}}">
                             <div class="buy-img">
                                 <img ng-src="{{item.thumb}}" />
                             </div>

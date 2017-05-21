@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-  .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate) {
+  .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate, $ionicLoading) {
 
     User.getHome().then(function (data) {
       console.log('返回成功')
@@ -10,7 +10,22 @@ angular.module('starter.controllers', [])
       }
     })
 
+    $scope.doRefresh = function () {
 
+      User.getHome().then(function (data) {
+        console.log('返回成功')
+        $scope.info = data;
+        if ($scope.info.banner) {
+          $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
+        }
+        $scope.$broadcast('scroll.refreshComplete');
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '2000'
+        });
+      })
+    }
 
     $scope.slideImgs = [
       {
@@ -103,8 +118,24 @@ angular.module('starter.controllers', [])
 
   })
 
-  .controller('myCtrl', function ($scope) {
+  .controller('myCtrl', function ($rootScope, $scope, $state, Message, User, $ionicLoading) {
+    $scope.myInfo = {};
+    User.getMyInfo().then(function (data) {
+      $scope.info = data
+    })
 
+    $scope.doRefresh = function () {
+      User.getMyInfo().then(function (data) {
+        $scope.info = data;
+        $scope.$broadcast('scroll.refreshComplete');
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '2000'
+        });
+      })
+
+    }
 
   })
   .controller('loginCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, Auth) {
@@ -219,6 +250,56 @@ angular.module('starter.controllers', [])
       $scope.reg.step = 3;
     })
   })
+  .controller('resetPsdCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, ENV, $interval, Auth) {
+    $scope.reg = {
+      captcha: null,
+      mobile: null,
+      password: null,
+      repassword: null,
+      number: 60,
+      bol: false
+    };
+    $scope.showNext = 1;
+    //获取短信验证码
+    $scope.getCaptcha = function () {
+      Auth.getCaptcha(function (response) {
+        if (response.code !== 0) {
+          Message.show(response.msg);
+          return false;
+        }
+        $rootScope.$broadcast('Captcha.send');
+        Message.show(response.msg, 1000);
+      }, function () {
+        Message.show('通信错误，请检查网络!', 1500);
+      }, $scope.reg.mobile);
+    };
+    //发送验证后倒计时
+    $scope.$on("Captcha.send", function () {
+      $scope.reg.bol = true;
+      $scope.reg.number = 60;
+      var timer = $interval(function () {
+        if ($scope.reg.number <= 1) {
+          $interval.cancel(timer);
+          $scope.reg.bol = false;
+          $scope.reg.number = 60;
+        } else {
+          $scope.reg.number--;
+        }
+      }, 1000)
+    });
+    //验证成功后
+    $scope.$on("Captcha.success", function () {
+      $scope.showNext = 3;
+    });
+    // 验证验证码
+    $scope.next = function () {
+      if ($scope.showNext == 3) {
+        Auth.setPassword($scope.reg, 1);
+      } else if ($scope.showNext == 1) {
+        Auth.checkCaptain($scope.reg.mobile, $scope.reg.captcha, 1);
+      }
+    };
+  })
   .controller('goodInfoCtrl', function ($rootScope, $scope, $stateParams, User) {
     $scope.cid = $stateParams.role;
     $scope.cidStatus = {
@@ -330,10 +411,10 @@ angular.module('starter.controllers', [])
         Message.show("收货人联系方式！");
         return false;
       }
-      // if (!$scope.payInfo.img) {
-      //   Message.show("订单凭证不能为空！");
-      //   return false;
-      // }
+      if (!$scope.payInfo.img) {
+        Message.show("订单凭证不能为空！");
+        return false;
+      }
       Order.create($scope.payInfo).then(function (data) {
         $state.go('user.orderInfo', { orderId: data.orderId, type: 1 })
       })
@@ -360,7 +441,7 @@ angular.module('starter.controllers', [])
       }
     };
   })
-  .controller('userOrderListCtrl', function ($scope, $rootScope, $stateParams, Order, $ionicModal) {
+  .controller('userOrderListCtrl', function ($scope, $rootScope, $stateParams, Order, $ionicModal, $timeout, $ionicLoading) {
     $scope.orderStatus = {
       '1': '待付款',
       '2': '待收货',
@@ -373,15 +454,56 @@ angular.module('starter.controllers', [])
     $scope.orderEmpty = false;
     $scope.type = $stateParams.type;
     Order.getList($scope.type).then(function (data) {
-      console.log('nininini')
       if (data == '' || data.length == 0) {
-
         $scope.orderEmpty = true;
       } else {
         $scope.orderEmpty = false;
         $scope.orderList = data;
       }
     });
+    //下拉刷新
+    $scope.doRefresh = function () {
+      $scope.noMore = true;
+      Order.getList($scope.type).then(function (data) {
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.orderList = data;
+        }
+        $scope.$broadcast('scroll.refreshComplete');
+        $timeout(function () {
+          $scope.noMore = false;
+        }, 1000)
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '1200'
+        });
+
+
+
+      });
+    }
+    // 下拉加载
+    $scope.noMore = false;
+    $scope.page = 2;
+    $scope.loadMore = function () {
+      Order.getList($scope.page).then(function (response) {
+        $scope.page++;
+        $scope.orderList = $scope.orderList.concat(response.data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        if (response.code != 0) {
+          $scope.noMore = true;
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '没有更多了！',
+            duration: '1200'
+          });
+        }
+      });
+    };
+
 
 
 
@@ -398,8 +520,9 @@ angular.module('starter.controllers', [])
     }
     Order.getInfo($stateParams.orderId).then(function (response) {
       $scope.orderInfo = response.data
-      if($scope.orderInfo.thumb){
-        $scope.payInfo.img=$scope.orderInfo.thumb
+      $scope.payInfo = {};
+      if ($scope.orderInfo.thumbs) {
+        $scope.payInfo.img = $scope.orderInfo.thumbs
       }
       // if ($scope.orderInfo.status == 3) {
       //   if ($scope.orderInfo.timeout) {
@@ -549,6 +672,523 @@ angular.module('starter.controllers', [])
       }
     }
 
+  })
+  .controller('userGetRealMoneyCtrl', function ($scope, $rootScope, User, Message, ENV, $ionicPopup, $state) {
+    angular.element(document).ready(function () {
+      // console.log($scope.info.cost.cash_less)
+      $scope.info = {};
+      $scope.allow = false;
+      //请求提现余额及其他
+      User.getRealMoneytotal().then(function (data) {
+        $scope.info = data;
+        $scope.info.bankName = data.bank.bankName || '';
+        $scope.info.bankCard = data.bank.bankCard || '';
+        $scope.info.bankMobile = data.bank.bankMobile || '';
+        $scope.info.bankUserName = data.bank.bankUserName || '';
+        $scope.info.takeMoney = ''
+        if ($scope.info.money == 0) {
+          $scope.allow = true;
+        } else {
+          $scope.allow = false;
+        }
+      })
+      $scope.submit = function () {
+        if (!$scope.info.bankName) {
+          Message.show('请输入银行全称');
+          return;
+        }
+        if (!$scope.info.bankCard || !ENV.BANK_CARD.test($scope.info.bankCard)) {
+          Message.show('请输入正确的银行卡号');
+          return;
+        }
+        if (!$scope.info.bankUserName) {
+          Message.show('请输入银行开户姓名');
+          return;
+        }
+        if (!$scope.info.bankMobile) {
+          Message.show('请输入银行预留手机号');
+          return;
+        }
+        if (!$scope.info.takeMoney || !ENV.REGULAR_MONEY.test($scope.info.takeMoney)) {
+          Message.show('请输入提现金额');
+          return;
+        }
+        // if ($scope.info.takeMoney > $scope.info.money) {
+        //   Message.show('提现余额不足');
+        //   return;
+        // }
+        // if ($scope.info.takeMoney < $scope.info.cost.cash_less) {
+        //   console.log('yanby')
+        //   Message.show('单次提现金额最低为' + $scope.info.cost.cash_less + '元');
+        //   return false;
+        // }
+        // if ($scope.info.takeMoney > $scope.info.cost.cash_most) {
+        //   Message.show('单日提现金额最高为' + $scope.info.cost.cash_most + '元');
+        //   return false;
+        // }
+
+        User.applyRealMoney($scope.info).then(function (data) {
+
+          var alertPopup = $ionicPopup.alert({
+            title: '申请已提交',
+          });
+          alertPopup.then(function (res) {
+            $state.go('user.repoList')
+          });
+        })
+
+      }
+    })
+  })
+  .controller('userRepoListCtrl', function ($scope, $rootScope, User, $ionicLoading, $stateParams, $timeout) {
+    $scope.type = $stateParams.type;
+    $scope.repoList = {};
+    $scope.orderEmpty = false;
+    $scope.select = $scope.type || 1;
+    User.getRepoList($scope.select).then(function (response) {
+      if (response.data == '' || response.data.length == 0) {
+        $scope.orderEmpty = true;
+      } else {
+        $scope.orderEmpty = false;
+        $scope.repoList = response.data
+      }
+    });
+
+    $scope.active = function (id) {
+      $scope.select = id;
+      $scope.noMore = false;
+      User.getRepoList(id).then(function (response) {
+        if (response.data == '' || response.data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.repoList = response.data
+        }
+      });
+    };
+
+    // 下拉刷新
+    $scope.doRefresh = function () {
+      $scope.noMore = true;
+      User.getRepoList($scope.select).then(function (response) {
+        if (response.data == '' || response.data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.repoList = response.data
+        }
+        $scope.$broadcast('scroll.refreshComplete');
+        $timeout(function () {
+          $scope.noMore = false;
+        }, 1000)
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '1200'
+        });
+      });
+    };
+    // 下拉加载
+    $scope.noMore = false;
+    $scope.page = 2;
+    $scope.loadMore = function () {
+      User.getRepoList($scope.select, $scope.page).then(function (response) {
+        $scope.page++;
+        $scope.repoList = $scope.repoList.concat(response.data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        if (response.code != 0) {
+          $scope.noMore = true;
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '没有更多了！',
+            duration: '1200'
+          });
+        }
+      });
+    };
+  })
+  .controller('userRepoInfoCtrl', function ($scope, Message, User, $stateParams) {
+    $scope.id = $stateParams.id;
+    $scope.repoInfo = {};
+    $scope.orderEmpty = false;
+    User.getRepoInfo($scope.id).then(function (response) {
+      if (response.data == '' || response.data.length == 0) {
+        $scope.orderEmpty = true;
+      } else {
+        $scope.repoInfo = response.data;
+      }
+    });
+  })
+  .controller('userMoneyBackCtrl', function ($scope, $stateParams, Order, $ionicLoading, $timeout) {
+    $scope.moneyBack = {}
+    $scope.orderEmpty = false;
+    Order.getMoneyBack().then(function (data) {
+      $scope.moneyBackInfo = data
+      $scope.orderEmpty = false;
+      if (data == '' || data.length == 0) {
+        $scope.orderEmpty = true;
+      }
+    })
+
+    //下拉刷新
+    $scope.doRefresh = function () {
+      $scope.noMore = true;
+      Order.getMoneyBack().then(function (data) {
+        $scope.moneyBackInfo = data
+        $scope.orderEmpty = false;
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        }
+        $scope.$broadcast('scroll.refreshComplete');
+        $timeout(function () {
+          $scope.noMore = false;
+        }, 1000)
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '2000'
+        });
+      })
+
+    };
+    //上拉加载
+    $scope.noMore = false;
+    $scope.page = 2;
+    $scope.loadMore = function () {
+      $scope.refreshing = false;
+      Order.getMoneyBack($scope.page).then(function (data) {
+        $scope.page++;
+        $scope.moneyBackInfo = $scope.moneyBackInfo.concat(data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        if (data.code != 0) {
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '没有更多了！',
+            duration: '1200'
+          });
+          $scope.noMore = true;
+        }
+      });
+    };
+
+
+
+  })
+  .controller('recPersonDetailCtrl', function ($scope, $stateParams, User, $ionicLoading, $timeout, $ionicSlideBoxDelegate) {
+    $scope.type = $stateParams.type;
+    $scope.info = {};
+    $scope.orderEmpty = false;
+    $scope.select = $scope.type || 1;
+    User.fetchRecPerson().then(function (data) {
+      $scope.info.count = data
+    })
+    User.fetchRecPersonList($scope.select).then(function (data) {
+      if (data == '' || data.length == 0) {
+        $scope.orderEmpty = true;
+      } else {
+        $scope.orderEmpty = false;
+        $scope.info.recList = data
+      }
+    })
+    $scope.active = function (select) {
+      $scope.select = select;
+      $scope.noMore = true;
+      User.fetchRecPersonList($scope.select).then(function (data) {
+        $scope.noMore = false;
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.info.recList = data
+        }
+      })
+    };
+    $scope.onSwipe = function (a) {
+      if (a == 'l') {
+        $scope.select++;
+        console.log('l')
+        if ($scope.select <= 3) {
+          User.fetchRecPersonList($scope.select).then(function (data) {
+            if (data == '' || data.length == 0) {
+              $scope.orderEmpty = true;
+            } else {
+              $scope.orderEmpty = false;
+              $scope.info.recList = data
+            }
+          });
+        }
+        $scope.select = Math.min(4, $scope.select);
+      } else {
+        console.log('r')
+        $scope.select--;
+        if ($scope.select > 0) {
+          User.fetchRecPersonList($scope.select).then(function (data) {
+            if (data == '' || data.length == 0) {
+              $scope.orderEmpty = true;
+            } else {
+              $scope.orderEmpty = false;
+              $scope.info.recList = data
+            }
+          });
+        }
+        $scope.select = Math.max(1, $scope.select);
+      }
+    };
+
+    //下拉刷新
+    $scope.doRefresh = function () {
+      $scope.noMore = true;
+      User.fetchRecPerson().then(function (data) {
+        $scope.info.count = data
+      })
+      User.fetchRecPersonList($scope.select).then(function (data) {
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.info.recList = data
+        }
+        $timeout(function () {
+          $scope.noMore = false;
+        }, 1000)
+        $scope.$broadcast('scroll.refreshComplete');
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '2000'
+        });
+      })
+    }
+    //上拉加载
+    $scope.noMore = false;
+    $scope.page = 2;
+    $scope.loadMore = function () {
+      $scope.refreshing = false;
+      User.fetchRecPersonList($scope.select, $scope.page).then(function (data) {
+        $scope.page++;
+        $scope.info.recList = $scope.info.recList.concat(data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        if (data.code != 0) {
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '没有更多了！',
+            duration: '1200'
+          });
+          $scope.noMore = true;
+        }
+      });
+    };
+  })
+  .controller('recPersonProfitCtrl', function ($scope, $stateParams, User, $ionicLoading, $timeout, $ionicSlideBoxDelegate) {
+    $scope.type = $stateParams.type;
+    $scope.info = {};
+    $scope.orderEmpty = false;
+    $scope.select = $scope.type || 1;
+    User.fetchRecProfit().then(function (data) {
+      $scope.info.count = data
+    })
+
+    User.fetchRecProfitList($scope.select).then(function (data) {
+      if (data == '' || data.length == 0) {
+        $scope.orderEmpty = true;
+      } else {
+        $scope.orderEmpty = false;
+        $scope.info.profitList = data
+      }
+    })
+    $scope.active = function (select) {
+      $scope.select = select;
+      $scope.noMore = true;
+      User.fetchRecProfitList($scope.select).then(function (data) {
+        $scope.noMore = false;
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.info.profitList = data
+        }
+      })
+    };
+    $scope.onSwipe = function (a) {
+      if (a == 'l') {
+        $scope.select++;
+        console.log('l')
+        if ($scope.select <= 3) {
+          User.fetchRecProfitList($scope.select).then(function (data) {
+            if (data == '' || data.length == 0) {
+              $scope.orderEmpty = true;
+            } else {
+              $scope.orderEmpty = false;
+              $scope.info.profitList = data
+            }
+          })
+        }
+        $scope.select = Math.min(4, $scope.select);
+      } else {
+        console.log('r')
+        $scope.select--;
+        if ($scope.select > 0) {
+          User.fetchRecProfitList($scope.select).then(function (data) {
+            if (data == '' || data.length == 0) {
+              $scope.orderEmpty = true;
+            } else {
+              $scope.orderEmpty = false;
+              $scope.info.profitList = data
+            }
+          })
+        }
+        $scope.select = Math.max(1, $scope.select);
+      }
+    };
+    //下拉刷新
+    $scope.doRefresh = function () {
+      $scope.noMore = true;
+      User.fetchRecProfit().then(function (data) {
+        $scope.info.count = data
+      })
+      User.fetchRecProfitList($scope.select).then(function (data) {
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.info.profitList = data
+        }
+        $timeout(function () {
+          $scope.noMore = false;
+        }, 1000)
+        $scope.$broadcast('scroll.refreshComplete');
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '2000'
+        });
+      })
+    }
+    //上拉加载
+    $scope.noMore = false;
+    $scope.page = 2;
+    $scope.loadMore = function () {
+      $scope.refreshing = false;
+      User.fetchRecProfitList($scope.select, $scope.page).then(function (data) {
+        $scope.page++;
+        $scope.info.profitList = $scope.info.profitList.concat(data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        if (data.code != 0) {
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '没有更多了！',
+            duration: '1200'
+          });
+          $scope.noMore = true;
+        }
+      });
+    };
+  })
+  .controller('recBuyProfitCtrl', function ($scope, $stateParams, User, $ionicLoading, $timeout, $ionicSlideBoxDelegate) {
+    $scope.type = $stateParams.type;
+    $scope.info = {};
+    $scope.orderEmpty = false;
+    $scope.select = $scope.type || 1;
+    User.fetchRecBProfit().then(function (data) {
+      $scope.info.count = data
+    })
+
+
+    User.fetchRecBProfitList($scope.select).then(function (data) {
+      if (data == '' || data.length == 0) {
+        $scope.orderEmpty = true;
+      } else {
+        $scope.orderEmpty = false;
+        $scope.info.buyList = data
+      }
+    })
+    $scope.active = function (select) {
+      $scope.select = select;
+      $scope.noMore = true;
+      User.fetchRecBProfitList($scope.select).then(function (data) {
+        $scope.noMore = false;
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.info.buyList = data
+        }
+      })
+    };
+    $scope.onSwipe = function (a) {
+      if (a == 'l') {
+        $scope.select++;
+        console.log('l')
+        if ($scope.select <= 3) {
+          User.fetchRecBProfitList($scope.select).then(function (data) {
+            if (data == '' || data.length == 0) {
+              $scope.orderEmpty = true;
+            } else {
+              $scope.orderEmpty = false;
+              $scope.info.buyList = data
+            }
+          })
+        }
+        $scope.select = Math.min(4, $scope.select);
+      } else {
+        console.log('r')
+        $scope.select--;
+        if ($scope.select > 0) {
+          User.fetchRecBProfitList($scope.select).then(function (data) {
+            if (data == '' || data.length == 0) {
+              $scope.orderEmpty = true;
+            } else {
+              $scope.orderEmpty = false;
+              $scope.info.buyList = data
+            }
+          })
+        }
+        $scope.select = Math.max(1, $scope.select);
+      }
+    };
+    //下拉刷新
+    $scope.doRefresh = function () {
+      $scope.noMore = true;
+      User.fetchRecBProfit().then(function (data) {
+        $scope.info.count = data
+      })
+      User.fetchRecBProfitList($scope.select).then(function (data) {
+        if (data == '' || data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.info.buyList = data
+        }
+        $timeout(function () {
+          $scope.noMore = false;
+        }, 1000)
+        $scope.$broadcast('scroll.refreshComplete');
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '2000'
+        });
+      })
+    }
+    //上拉加载
+    $scope.noMore = false;
+    $scope.page = 2;
+    $scope.loadMore = function () {
+      $scope.refreshing = false;
+      User.fetchRecBProfitList($scope.select, $scope.page).then(function (data) {
+        $scope.page++;
+        $scope.info.buyList = $scope.info.buyList.concat(data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        if (data.code != 0) {
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '没有更多了！',
+            duration: '1200'
+          });
+          $scope.noMore = true;
+        }
+      });
+    };
   })
 
 

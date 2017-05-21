@@ -1,5 +1,5 @@
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'starter.services', 'starter.directives', 'ngCordova', 'ngResource'])
-  .run(function ($rootScope, $ionicPlatform, Storage, $cordovaSplashscreen, $location, $ionicHistory, $interval) {
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'starter.services', 'starter.directives', 'ngCordova', 'ngResource', 'ngTouch'])
+  .run(function ($rootScope, $ionicPlatform, Storage, $cordovaSplashscreen, $location, $ionicHistory, $interval, Message) {
     $ionicPlatform.ready(function () {
       if (window.cordova && window.cordova.plugins && window.cordova.plugins.keyboard) {
         cordova.plugins.keyboard.hideKeyboardAccessoryBar(true);
@@ -61,7 +61,10 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
   })
   .constant('ENV', {
     'TB_URL': 'http://192.168.0.122/app/index.php?i=1&c=entry&m=taobao',
-    'REGULAR_MOBILE': /^1\d{10}$/
+    'REGULAR_MONEY': /^\d*(\.\d{1,2}){0,1}$/,
+    'REGULAR_MOBILE': /^1\d{10}$/,
+		'REGULAR_IDCARD': /^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/,
+    'BANK_CARD': /^(\d{16}|\d{19})$/,
   })
   .config(function ($ionicConfigProvider) {
     $ionicConfigProvider.platform.ios.tabs.style('standard');

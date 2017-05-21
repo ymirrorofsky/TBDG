@@ -160,6 +160,14 @@ angular.module('starter.services', [])
           mobile: mobile,
           code: captcha
         };
+        if (type) {
+          _json = {
+            op: 'forget',
+            type: 'verifycode',
+            mobile: mobile,
+            code: captcha
+          };
+        }
         Message.loading();
         return resource.get(_json, function (response) {
           if (response.code !== 0) {
@@ -208,11 +216,24 @@ angular.module('starter.services', [])
             return;
           }
           $state.go('auth.login');
-          Message.show("密码设置成功，请重新登录！", 1500);
+          Message.show(response.msg, 1500);
         }, function () {
           Message.show('通信错误，请检查网络！', 1500);
         });
-      }
+      },
+      //忘记密码获取验证码
+      getCaptcha: function (success, error, mobile) {
+        if (!checkMobile(mobile)) {
+          return false;
+        }
+        var _json = {
+          op: 'forget',
+          type: 'send',
+          mobile: mobile
+        };
+        Message.loading();
+        resource.save(_json, success, error);
+      },
     }
   })
   .factory('User', function ($resource, $rootScope, $q, ENV, Message, $state, Storage) {
@@ -378,12 +399,214 @@ angular.module('starter.services', [])
         });
         return deferred.promise;
       },
+      //获取提现信息
+      getRealMoneytotal: function () {
+        var shopUser = Storage.get('user')
+        var deferred = $q.defer();
+        var _json = {};
+        _json = {
+          op: 'getRealMoneytotal',
+          uid: shopUser.uid,
+          role: shopUser.role
+        };
+        Message.loading();
+        resource.save(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      //提现申请
+      applyRealMoney: function (info) {
+        var deferred = $q.defer();
+        var _json = {};
+        _json = {
+          op: 'applyRealMoney',
+          bankName: info.bankName,
+          bankCard: info.bankCard,
+          bankUserName: info.bankUserName,
+          bankMobile: info.bankMobile,
+          takeMoney: info.takeMoney,
+          // count: info.cost.count
+        };
+        Message.loading();
+        resource.save(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      // 提现列表
+      getRepoList: function (type, page) {
+        var shopUser = Storage.get('user')
+        var deferred = $q.defer();
+        page = page || 1;
+        Message.loading();
+        resource.save({ op: 'withdrawList', type: type, page: page, uid: shopUser.uid }, function (response) {
+          Message.hidden();
+          deferred.resolve(response);
+        });
+        return deferred.promise;
+      },
+      // 提现单
+      getRepoInfo: function (id) {
+        var shopUser = Storage.get('user')
+        var deferred = $q.defer();
+        Message.loading();
+        resource.save({ op: 'getWithdrawInfo', id: id }, function (response) {
+          Message.hidden();
+          deferred.resolve(response);
+          if (response.code == 1) {
+            Message.show(response.msg);
+            return;
+          }
+        });
+        return deferred.promise;
+      },
+      //获取我的信息
+      getMyInfo: function () {
+        var user = Storage.get('user')
+        var deferred = $q.defer();
+        var _json = {
+          op: 'myInfo',
+          uid: user.uid,
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+
+        });
+        return deferred.promise;
+      },
+      //获取推荐下级
+      fetchRecPerson: function () {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'recPerson',
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      fetchRecPersonList: function (role, page) {
+        var deferred = $q.defer();
+        page = page || 1;
+        var _json = {
+          op: 'recPersonList',
+          role: role,
+          page: page
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      //获取推荐下级会员收益
+      fetchRecProfit: function () {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'recProfit',
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      fetchRecProfitList: function (select, page) {
+        var deferred = $q.defer();
+        page = page || 1;
+        var _json = {
+          op: 'recProfitList',
+          role: select,
+          page: page
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+
+      //获取推荐下级会员消费收益
+      fetchRecBProfit: function (select, page) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'recBuyProfit',
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+      fetchRecBProfitList: function (select, page) {
+        var deferred = $q.defer();
+        page = page || 1;
+        var _json = {
+          op: 'recBuyProfitList',
+          role: select,
+          page: page
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+        });
+        return deferred.promise;
+      },
+
+
     }
   })
   .factory('Order', function ($resource, $rootScope, $q, ENV, Message, $state, Storage) {
     var resource = $resource(ENV.TB_URL + '&do=order', { op: '@op' });
     return {
-
       create: function (payInfo) {
         var deferred = $q.defer();
         var _json = {
@@ -391,7 +614,7 @@ angular.module('starter.services', [])
           goodsName: payInfo.goodName,
           price: payInfo.price,
           mobile: payInfo.mobile,
-          img: payInfo.img,
+          thumbs: payInfo.img,
           message: payInfo.message,
         }
         resource.save(_json, function (response) {
@@ -480,7 +703,29 @@ angular.module('starter.services', [])
           }
         })
         return deferred.promise;
+      },
+      getMoneyBack: function (time, page) {
+        var shopUser = Storage.get('user')
+        var deferred = $q.defer();
+        page = page || 1;
+        var _json = {
+          op: 'moneyBack',
+          spid: shopUser.uid,
+          page: page
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+
+        });
+        return deferred.promise;
       }
+
 
     }
   })
