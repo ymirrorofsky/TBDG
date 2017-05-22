@@ -8,8 +8,8 @@
     <ion-content class="bodybg-normal">
         <!--滚动轮播图-->
         <ion-slide-box delegate-handle="slideimgs" does-continue="true" show-pager="true" auto-play="true">
-            <ion-slide ng-repeat="focus in slideImgs">
-                <a ng-href="#"><img ng-src="{{focus.src}}" width="100%" class="banner-img"></a>
+            <ion-slide ng-repeat="item in info.image">
+                <a ><img ng-src="{{item.thumb}}" width="100%" class="banner-img"></a>
             </ion-slide>
         </ion-slide-box>
         <section class="goods-info">

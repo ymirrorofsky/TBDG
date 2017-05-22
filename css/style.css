@@ -269,7 +269,7 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 }
 .goods-info .price .rank span {
 	display: inline-block;
-    background: #e8814e;
+    background: #f9685f;
     border-radius: 5px;
     width: 35%;
     text-align: center;
@@ -292,9 +292,7 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 	height: 50px;
 }
 .shopping .btn_con {
-	width: 35%;
     height: 100%;
-    float: right;
 }
 .shopping .btn_con .buy_now {
 	width: 100%;
@@ -304,6 +302,9 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
     background: -moz-linear-gradient(right, rgba(253,132,89,0.93) , rgba(247,86,82,0.93));
     background: linear-gradient(to right, rgba(253,132,89,0.93) , rgba(247,86,82,0.93));
 	border: none;
+	color: #fff;
+	font-size: 1.5rem;
+	letter-spacing:5px;
 }
 .buy_footer {
 	padding: 0 !important;
@@ -419,9 +420,9 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 	height: 200px;
 	border: 1px solid #999;
 	text-align: center;
-	line-height: 150px;
+	line-height: 200px;
 	color: #999;
-	font-size:22px;
+	font-size:30px;
 	margin:0 8px 0 10px;
 }
 .yd-add-img img{
@@ -782,4 +783,53 @@ padding: 5px 0;
 	color: #eee;
 	margin: 0;
 }
-
+/*系统消息*/
+.ydgy-news li{
+	background:#fff;
+	line-height:45px;
+	border-bottom:1px solid #EAEAEA;
+}
+.ydgy-news li a{
+	padding:0 10px;
+}
+.ydgy-news li a b, .ydgy-news li a i{
+	font-size:20px;
+}
+.ydgy-news li a i{
+	color: #666;
+}
+.ydgy-news li a h3{
+	font-size:15px;
+	margin:0;
+	padding:0 10px;
+	line-height:45px;
+}
+/*消息详情*/
+.ydgy-news-det{
+	padding:0 10px 5px;
+	border-bottom: 1px solid #eaeaea;
+}
+.ydgy-news-det h3{
+	font-size:16px;
+	margin: 10px 0 2px 0;
+	text-align: center;
+}
+.ydgy-news-det span{
+	float: right;
+	color: #7d7d7d;
+}
+.news-content{
+	padding:10px;
+	text-indent: 2em;
+}
+.yd-reject-con{
+	padding:30px 10px 10px;
+}
+.yd-reject-con span{
+	line-height:30px;
+}
+.yd-reject-con textarea{
+	padding:5px;
+	border:2px dotted #ff6600;
+	border-radius: 5px;
+}

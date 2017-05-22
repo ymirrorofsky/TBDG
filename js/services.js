@@ -399,6 +399,24 @@ angular.module('starter.services', [])
         });
         return deferred.promise;
       },
+      //获取提现须知
+      MoneyNote: function () {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'MoneyNote',
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+
+        });
+        return deferred.promise;
+      },
       //获取提现信息
       getRealMoneytotal: function () {
         var shopUser = Storage.get('user')
@@ -473,11 +491,11 @@ angular.module('starter.services', [])
       },
       //获取我的信息
       getMyInfo: function () {
-        var user = Storage.get('user')
+        var shopUser = Storage.get('user')
         var deferred = $q.defer();
         var _json = {
           op: 'myInfo',
-          uid: user.uid,
+          uid: shopUser.uid,
         }
         Message.loading();
         resource.get(_json, function (response) {
@@ -600,6 +618,95 @@ angular.module('starter.services', [])
         });
         return deferred.promise;
       },
+      // 用户帮助列表
+      useHelp: function () {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'helpList'
+        };
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+
+        }, function () {
+          Message.show('通信错误，请检查网络!', 1500);
+        });
+        return deferred.promise;
+      },
+      // 用户帮助列表详情
+      helpInfo: function (id) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'helpInfo',
+          id: id
+        };
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else {
+            Message.show(response.msg);
+          }
+
+        }, function () {
+          Message.show('通信错误，请检查网络!', 1500);
+        });
+        return deferred.promise;
+      },
+      // 忘记密码获取验证码
+      resetPwd: function (newpsd, respsd) {
+        Message.loading();
+        var deferred = $q.defer();
+        var _json = {
+          op: 'forgetPayPassword',
+          type: 'send',
+          password: newpsd,
+          repassword: respsd
+        }
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+            Message.show(response.msg);
+          } else {
+            Message.show(response.msg);
+          }
+        }, function () {
+          Message.show('通信错误，请检查网络!', 1500);
+        });
+        return deferred.promise;
+      },
+      // 忘记支付密码提交修改
+      resetPayPsd: function (newpsd, respsd, code) {
+        Message.loading();
+        var deferred = $q.defer();
+        var _json = {
+          op: 'forgetPayPassword',
+          code: code,
+          password: newpsd,
+          repassword: respsd
+        }
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response.data);
+          } else if (response.code == 301) {
+            Message.show(response.msg);
+            $state.go('user.center');
+          } else {
+            Message.show(response.msg);
+          }
+        }, function () {
+          Message.show('通信错误，请检查网络!', 1500);
+        });
+        return deferred.promise;
+      }
 
 
     }
@@ -724,8 +831,85 @@ angular.module('starter.services', [])
 
         });
         return deferred.promise;
-      }
+      },
+      //确认shouh
+      getGoodReturn: function (orderInfo) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'return',
+          goodsName: orderInfo.goodName,
+          price: orderInfo.price,
+          mobile: orderInfo.mobile,
+          thumbs: orderInfo.img,
+          message: orderInfo.message,
+          returnMsg: orderInfo.returnMsg
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve();
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        })
+        return deferred.promise;
+      },
+      // 提现列表
+      getRepoList: function (type, page) {
+        var shopUser = Storage.get('user')
+        var deferred = $q.defer();
+        page = page || 1;
+        Message.loading();
+        resource.save({ op: 'withdrawList', type: type, page: page, uid: shopUser.uid }, function (response) {
+          Message.hidden();
+          deferred.resolve(response);
+        });
+        return deferred.promise;
+      },
 
 
+    }
+  })
+  .factory('Payment', function ($resource, $rootScope, $ionicLoading, ENV, Message, $state) {
+    var payType = {};
+    var resource = $resource(ENV.TB_URL + '&do=payment');
+    return {
+      // 支付宝支付
+      alipay: function (model, info, order) {
+
+
+
+
+
+
+
+        var _json = {};
+        if (model == 'welfare') {
+          _json = {
+            op: 'getAlipay', /*, uid: userInfo.uid, signature: sign.signature, timestamp: sign.timestamp*/
+            model: 'welfare',
+            price: info.price,
+            orderId: info.orderId,
+            uid: $rootScope.globalInfo.user.uid,
+          }
+        }
+        resource.get(_json, function (response) {
+          payInfo = response.data.payInfo;
+          document.addEventListener("deviceready", function () {
+            cordova.plugins.alipay.payment(payInfo, function (successResults) {
+              if (successResults.resultStatus == "9000") {
+                Message.show("支付成功");
+                $state.go('user.orderList', { type: 2 });
+              }
+            }, function (errorResults) {
+              console.error('支付失败：' + errorResults);
+            });
+          }, false);
+        }, function () {
+          Message.show("通信超时，请重试！");
+        })
+
+      },
     }
   })

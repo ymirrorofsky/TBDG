@@ -1,7 +1,9 @@
 angular.module('starter.controllers', [])
 
   .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate, $ionicLoading) {
-
+    if(!$rootScope.globalInfo.user.uid){
+      $state.go('auth.login')
+    }
     User.getHome().then(function (data) {
       console.log('返回成功')
       $scope.info = data;
@@ -11,21 +13,25 @@ angular.module('starter.controllers', [])
     })
 
     $scope.doRefresh = function () {
-
       User.getHome().then(function (data) {
-        console.log('返回成功')
-        $scope.info = data;
-        if ($scope.info.banner) {
-          $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
-        }
+        console.log(data.banner)
+        $scope.info.goods = data.goods;
+        $scope.info.navigation = data.navigation;
         $scope.$broadcast('scroll.refreshComplete');
         $ionicLoading.show({
           noBackdrop: true,
           template: '刷新成功！',
           duration: '2000'
         });
+        if ($scope.info.banner) {
+          $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
+        }
+
       })
+
+
     }
+
 
     $scope.slideImgs = [
       {
@@ -139,6 +145,12 @@ angular.module('starter.controllers', [])
 
   })
   .controller('loginCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, Auth) {
+    if ($rootScope.globalInfo.user.uid) {
+      $state.go('tab.home')
+    }
+
+
+
     $scope.agree = true;
     $scope.authAgree = function () {
       $scope.agree = !$scope.agree;
@@ -300,7 +312,7 @@ angular.module('starter.controllers', [])
       }
     };
   })
-  .controller('goodInfoCtrl', function ($rootScope, $scope, $stateParams, User) {
+  .controller('goodInfoCtrl', function ($rootScope, $scope, $stateParams, User, $ionicSlideBoxDelegate) {
     $scope.cid = $stateParams.role;
     $scope.cidStatus = {
       '1': '金牌',
@@ -312,21 +324,16 @@ angular.module('starter.controllers', [])
     }
     User.getGoodInfo($scope.cid).then(function (data) {
       $scope.info = data;
-    })
-    $scope.slideImgs = [
-      {
-        src: 'http://img.zcool.cn/community/01f20b580dc026a84a0e282bace64b.jpg@900w_1l_2o_100sh.jpg'
-      },
-      {
-        src: 'http://img3.imgtn.bdimg.com/it/u=2700298075,1732077336&fm=23&gp=0.jpg'
-      },
-      {
-        src: 'http://img.zcool.cn/community/01d75b57e0ff840000018c1b748e15.jpg@900w_1l_2o_100sh.jpg'
+      console.log($scope.info)
+      if ($scope.info.image) {
+        console.log('ksafjkl')
+        $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
       }
-    ];
+    })
+
 
   })
-  .controller('createOrderCtrl', function ($scope, $rootScope, $cordovaCamera, $ionicActionSheet, $ionicModal, ENV, Order, $state) {
+  .controller('createOrderCtrl', function ($scope, $rootScope, $cordovaCamera, $ionicActionSheet, $ionicModal, ENV, Order, $state, Message) {
     /*上传支付凭证*/
     $scope.payInfo = {
       goodName: '',
@@ -411,17 +418,20 @@ angular.module('starter.controllers', [])
         Message.show("收货人联系方式！");
         return false;
       }
-      if (!$scope.payInfo.img) {
-        Message.show("订单凭证不能为空！");
-        return false;
-      }
+      // if (!$scope.payInfo.img) {
+      //   Message.show("订单凭证不能为空！");
+      //   return false;
+      // }
       Order.create($scope.payInfo).then(function (data) {
         $state.go('user.orderInfo', { orderId: data.orderId, type: 1 })
       })
     }
 
   })
-  .controller('userPayCtrl', function ($scope, $rootScope) {
+  .controller('userPayCtrl', function ($scope, $rootScope, $stateParams, Payment) {
+    $scope.payInfo = {}
+    $scope.payInfo.orderId = $stateParams.orderId;
+    $scope.payInfo.price = $stateParams.price;
     $scope.payType = 'alipay';
     $scope.selectPayType = function (type) {
       $scope.payType = type;
@@ -437,7 +447,7 @@ angular.module('starter.controllers', [])
         Payment.wechatPay(model);
       } else if ($scope.payType == 'alipay') {
         console.log('支付宝')
-        alert("证书尚未配置，请用微信支付！");
+        Payment.alipay('welfare', $scope.payInfo)
       }
     };
   })
@@ -540,6 +550,21 @@ angular.module('starter.controllers', [])
         $state.go('user.orderList', ({ type: 5 }))
       })
     }
+    $scope.return = function () {
+      Order.return($scope.orderInfo).then(function (data) {
+        $state.go('user.orderList', ({ type: 4 }))
+      })
+    }
+    $scope.returnApply = function () {
+      $scope.returnModal.show();
+
+    }
+    $ionicModal.fromTemplateUrl('templates/modal/return.html', {
+      scope: $scope,
+      animation: 'slide-in-right'
+    }).then(function (modal) {
+      $scope.returnModal = modal;
+    })
     $ionicModal.fromTemplateUrl('templates/modal/showOrder.html', {
       scope: $scope,
       animation: 'slide-in-right'
@@ -677,7 +702,12 @@ angular.module('starter.controllers', [])
     angular.element(document).ready(function () {
       // console.log($scope.info.cost.cash_less)
       $scope.info = {};
+      $scope.MoneyNote = '';
       $scope.allow = false;
+      User.MoneyNote().then(function (data) {
+        $scope.MoneyNote = data;
+        console.log($scope.MoneyNote)
+      })
       //请求提现余额及其他
       User.getRealMoneytotal().then(function (data) {
         $scope.info = data;
@@ -917,7 +947,7 @@ angular.module('starter.controllers', [])
             }
           });
         }
-        $scope.select = Math.min(4, $scope.select);
+        $scope.select = Math.min(3, $scope.select);
       } else {
         console.log('r')
         $scope.select--;
@@ -1023,7 +1053,7 @@ angular.module('starter.controllers', [])
             }
           })
         }
-        $scope.select = Math.min(4, $scope.select);
+        $scope.select = Math.min(3, $scope.select);
       } else {
         console.log('r')
         $scope.select--;
@@ -1129,7 +1159,7 @@ angular.module('starter.controllers', [])
             }
           })
         }
-        $scope.select = Math.min(4, $scope.select);
+        $scope.select = Math.min(3, $scope.select);
       } else {
         console.log('r')
         $scope.select--;
@@ -1190,6 +1220,132 @@ angular.module('starter.controllers', [])
       });
     };
   })
+  .controller('userHelpCtrl', function ($scope, User) {
+    $scope.userList = '';
+    User.useHelp().then(function (data) {
+      $scope.userList = data;
+      console.log(data)
+    });
+  })
+  // 用户帮助列表详情
+  .controller('userNewsDetailsCtrl', function ($scope, User, $stateParams) {
+    $scope.boll = false;
+    $scope.helpDetail = {
+      title: '',
+      createtime: '',
+      content: ''
+    };
+    $scope.id = $stateParams.id;
+    User.helpInfo($scope.id).then(function (data) {
+      $scope.boll = true;
+      $scope.helpDetail = data;
+    })
+  })
 
+  // 忘记支付密码
+  .controller('userResetPayWordCtrl', function ($scope, User, ENV, Message, $interval) {
+    $scope.getPsd = true;
+    $scope.getCaptchaSuccess = false;
+    $scope.pay = {
+      mobile: '',
+      code: '',
+      newpsd: '',
+      respsd: '',
+      number: 60
+    };
+    $scope.getCode = function (newpsd, respsd) {
+      if (newpsd.length < 6 || respsd.length < 6) {
+        Message.show('请输入至少6位的密码');
+        return;
+      } else if (newpsd != respsd) {
+        Message.show('两次密码不一致');
+        return;
+      }
+      User.resetPwd(newpsd, respsd).then(function (data) {
+        $scope.getCaptchaSuccess = true;
+        var timer = $interval(function () {
+          if ($scope.pay.number <= 1) {
+            $interval.cancel(timer);
+            $scope.getCaptchaSuccess = false;
+            $scope.pay.number = 60;
+          } else {
+            $scope.pay.number--;
+          }
+        }, 1000)
+      })
+    };
+
+    $scope.savePsd = function (newpsd, respsd, code) {
+      User.resetPayPsd(newpsd, respsd, code);
+    }
+
+  })
+  .controller('goodReturnCtrl', function ($scope, $rootScope, Order, $ionicLoading, $stateParams, $timeout) {
+    $scope.type = $stateParams.type;
+    $scope.returnList = {};
+    $scope.orderEmpty = false;
+    $scope.select = $scope.type || 1;
+    Order.getGoodReturn($scope.select).then(function (response) {
+      if (response.data == '' || response.data.length == 0) {
+        $scope.orderEmpty = true;
+      } else {
+        $scope.orderEmpty = false;
+        $scope.returnList = response.data
+      }
+    });
+
+    $scope.active = function (id) {
+      $scope.select = id;
+      $scope.noMore = false;
+      Order.getGoodReturn(id).then(function (response) {
+        if (response.data == '' || response.data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.returnList = response.data
+        }
+      });
+    };
+
+    // 下拉刷新
+    $scope.doRefresh = function () {
+      $scope.noMore = true;
+      Order.getGoodReturn($scope.select).then(function (response) {
+        if (response.data == '' || response.data.length == 0) {
+          $scope.orderEmpty = true;
+        } else {
+          $scope.orderEmpty = false;
+          $scope.returnList = response.data
+        }
+        $scope.$broadcast('scroll.refreshComplete');
+        $timeout(function () {
+          $scope.noMore = false;
+        }, 1000)
+        $ionicLoading.show({
+          noBackdrop: true,
+          template: '刷新成功！',
+          duration: '1200'
+        });
+      });
+    };
+    // 下拉加载
+    $scope.noMore = false;
+    $scope.page = 2;
+    $scope.loadMore = function () {
+      Order.getGoodReturn($scope.select, $scope.page).then(function (response) {
+        $scope.page++;
+        $scope.returnList = $scope.repoList.concat(response.data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        if (response.code != 0) {
+          $scope.noMore = true;
+          $ionicLoading.show({
+            noBackdrop: true,
+            template: '没有更多了！',
+            duration: '1200'
+          });
+        }
+      });
+    };
+  })
 
 

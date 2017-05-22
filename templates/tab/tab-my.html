@@ -15,7 +15,7 @@
         </div>
         <div class="flex yd-love-exBean" ui-sref="user.getRealMoney" style="background-color:#fff;margin-top: 10px;">
             <div class="flex_1">
-                <p><i class="iconfont icon-woyaohuigoutubiao"></i>可提金额<span ng-bind="info.allowMoney || 0"  style="margin-left:5px">5元</span></p>
+                <p><i class="iconfont icon-woyaohuigoutubiao"></i>可提金额<span ng-bind="info.allowMoney || 0"  style="margin-left:5px;color:#FE5400"></span>&nbsp;(元)</p>
             </div>
             提现<i class="iconfont icon-right"  style="position: relative;top: 2px;"></i>
         </div>
@@ -29,7 +29,7 @@
                     <li ui-sref='user.orderList({type:5})' ng-class="{'onOrder':orderStatus=='5'}"><i class="iconfont icon-deliver"></i><span>已完成</span></li>
                     <li ui-sref='user.orderList({type:6})' ng-class="{'onOrder':orderStatus=='6'}"><i class="iconfont icon-dou-copy"></i><span>正返现</span></li>
                     <li ui-sref='user.orderList({type:7})' ng-class="{'onOrder':orderStatus=='7'}"><i class="iconfont icon-woyaohuigoutubiao"></i><span>已返现</span></li>
-                    <li ui-sref='user.orderList({type:4})' ng-class="{'onOrder':orderStatus=='4'}"><i class="iconfont icon-dingdan2"></i><span>退货</span></li>
+                    <li ui-sref='user.goodReturn({type:1})' ng-class="{'onOrder':orderStatus=='4'}"><i class="iconfont icon-dingdan2"></i><span>退货</span></li>
                 </ul>
             </div>
         </section>
@@ -91,10 +91,5 @@
                 <i class="iconfont icon-right"></i>
             </div>
         </section>
-
-
-
-
-
 
     </ion-content>

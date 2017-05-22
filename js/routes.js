@@ -70,7 +70,7 @@ angular.module('starter.routes', [])
             .state('user.pay', {
                 url: '/pay',
                 cache: false,
-                // params: { orderId: null, spid: null, payPrice: null },
+                params: { orderId: null, Price: null },
                 templateUrl: 'templates/user/pay.html',
                 controller: 'userPayCtrl'
             })
@@ -158,6 +158,34 @@ angular.module('starter.routes', [])
                 cache: false,
                 templateUrl: 'templates/user/recBuyProfit.html',
                 controller: 'recBuyProfitCtrl'
+            })
+            .state('user.userHelp', {
+                url: '/userHelp',
+                templateUrl: 'templates/user/userHelp.html',
+                controller: 'userHelpCtrl'
+            })
+            .state('user.newsDetails', {
+                url: '/newsDetails/:id',
+                templateUrl: 'templates/user/newsDetails.html',
+                controller: 'userNewsDetailsCtrl'
+            })
+            .state('user.resetPayWord', {
+                url: '/resetPayWord',
+                params: {
+                    type: null
+                },
+                cache: false,
+                templateUrl: 'templates/user/resetPayWord.html',
+                controller: 'userResetPayWordCtrl'
+            })
+            .state('user.goodReturn', {
+                url: '/goodReturn/:type',
+                params: {
+                    type: null
+                },
+                cache: false,
+                templateUrl: 'templates/user/goodReturn.html',
+                controller: 'goodReturnCtrl'
             })
 
 

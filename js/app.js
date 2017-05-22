@@ -38,12 +38,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
         if (exit) {
           ionic.Platform.exitApp();
         } else {
-          console.log(1111);
           exit = true;
           Message.show('再按一次退出系统', "1000");
           setTimeout(function () {
             exit = false;
-          }, 2000);
+          }, 3000);
         }
       } else if ($ionicHistory.backView()) {
         $ionicHistory.goBack();
@@ -52,7 +51,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
         Message.show('再按一次退出系统', "1000");
         setTimeout(function () {
           exit = false;
-        }, 2000);
+        }, 3000);
       }
       e.preventDefault();
       return false;

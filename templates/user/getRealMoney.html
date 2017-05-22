@@ -1,7 +1,7 @@
 <ion-view view-title="我要提现" hide-nav-bar="true">
     <ion-header-bar class="bar-assertive header-back">
         <div class="buttons">
-            <button class="button iconfont icon-back1 button-clear" ng-click="$ionicGoBack()">返回</button>
+            <button class="button iconfont icon-back1 button-clear" ui-sref='tab.my'>返回</button>
         </div>
         <h1 class="title">我要提现</h1>
         <div class="buttons">
@@ -9,9 +9,9 @@
         </div>
     </ion-header-bar>
     <ion-content class="bodybg-normal">
-        <div class="yd-donate-text padding">
-            提现须知： <br> 单次提现手续费: <span ng-bind="info.cost.count | currency:'￥'"></span><br> 单次提现最低额度: <span ng-bind="info.cost.cash_less | currency:'￥'"></span><br>单日提现最高额度:
-            <span ng-bind="info.cost.cash_most | currency:'￥'"></span>
+        <div class="yd-donate-text padding"  ng-bind-html="MoneyNote.text">
+            <!--提现须知： <br> 单次提现手续费: <span ng-bind="info.cost.count | currency:'￥'"></span><br> 单次提现最低额度: <span ng-bind="info.cost.cash_less | currency:'￥'"></span><br>单日提现最高额度:
+            <span ng-bind="info.cost.cash_most | currency:'￥'"></span>-->
         </div>
         <div class="yd-donate-count real-count">
             <ul>
