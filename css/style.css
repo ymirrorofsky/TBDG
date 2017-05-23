@@ -416,7 +416,7 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 }
 .yd-add-img em{
 	display: inline-block;
-	width: 150px;
+	width: 45%;
 	height: 200px;
 	border: 1px solid #999;
 	text-align: center;
@@ -427,7 +427,7 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 }
 .yd-add-img img{
 	display: inline-block;
-	width: 150px;
+	width: 45%;
 	height: 200px;
 	border: 1px solid #999;
 	text-align: center;
@@ -439,7 +439,7 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 .yd-add-img i{
 	position: absolute;
 	display: inline-block;
-	width: 150px;
+	width: 45%;
 	height: 200px;
 	background-size: 100% 100%
 }

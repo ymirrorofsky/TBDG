@@ -1,12 +1,12 @@
 <ion-view view-title="个人信息" hide-nav-bar="true">
 	<ion-header-bar class="bar-assertive header-back">
 		<div class="buttons">
-			<button class="button iconfont icon-back1 button-clear" ng-click="$ionicGoBack()">返回</button>
+			<button class="button iconfont icon-back1 button-clear" ui-sref='user.center'>返回</button>
 		</div>
 		<h1 class="title">个人信息</h1>
 	</ion-header-bar>
-	<ion-content class="bodybg-normal">
-		<div class="real-count" ng-if="!personalSuccess">
+	<ion-content class="bodybg-normal has-header" ng-if="personalSuccess">
+		<div class="real-count">
 			<ul>
 				<li>
 					<label>登录账号</label>
@@ -23,16 +23,16 @@
 						<span ng-click="select(2)"><i ng-class="info.gender == 2 ? 'ion-ios-circle-filled':'ion-ios-circle-outline'"></i><em>女</em></span>
 					</div>
 				</li>
-				<!--<li>
-					<label>手机号码</label>
-					<input type="text" placeholder="请输入手机号码" maxlength="18" ng-model="pageData.idcard">
-				</li>-->
 			</ul>
 			<div class="padding sure-btn">
 				<button class="button button-block button-assertive" ng-click="submit()">确定</button>
 			</div>
 		</div>
-		<div class="real-count" ng-if="personalSuccess">
+
+	</ion-content>
+	<ion-content class="bodybg-normal has-header" ng-if="!personalSuccess">
+
+		<div class="real-count">
 			<ul>
 				<li>
 					<label>登录账号</label>

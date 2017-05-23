@@ -6,7 +6,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
         cordova.plugins.keyboard.disableScroll(true)
       }
       if (window.StatusBar) {
-        StatusBar.backgroundColorByHexString("#ff6600");
+        StatusBar.backgroundColorByHexString("#FE5400");
       }
     })
 

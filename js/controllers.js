@@ -539,7 +539,7 @@ angular.module('starter.controllers', [])
 
 
   })
-  .controller('userOrderInfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal, Message) {
+  .controller('userOrderInfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal, Message, $cordovaClipboard) {
     $scope.orderStatus = {
       '1': '待付款',
       '2': '待收货',
@@ -605,9 +605,31 @@ angular.module('starter.controllers', [])
     }
     $scope.returnApply = function () {
       $scope.returnModal.show();
+    }
+    $scope.express = function () {
+      var options = {
+        location: 'yes',
+        clearcache: 'yes',
+        toolbar: 'no'
+      };
+      document.addEventListener("deviceready", function () {
+        $cordovaInAppBrowser.open('http://www.kuaidi100.com/', '_blank', options)
+          .then(function (event) {
+          })
+          .catch(function (event) {
+          });
+      }, false);
+    }
+    $scope.copy = function () {
+      $cordovaClipboard
+        .copy('ah556568444451')
+        .then(function () {
+          Message.show('复制成功',1000)
+        }, function () {
+          // error
+        });
 
     }
-
 
 
   })
@@ -640,30 +662,34 @@ angular.module('starter.controllers', [])
     };
   })
   .controller('userRealNameCtrl', function ($scope, $rootScope, $stateParams, User, $state) {
-    $scope.info = {
-      realname: '',
-      gender: 1,
-    };
-    // $scope.getCaptchaSuccess = false;
-    $scope.personalSuccess = false;
-    $scope.select = function (type) {
-      $scope.info.gender = type;
-    };
-    $scope.sex = {
-      1: '男',
-      2: '女'
-    }
-    User.getSettingInfo().then(function (data) {
-      if (data.realname == '') {
-        $scope.info = {
-          realname: '',
-          gender: 1,
-        };
-        return false;
+    angular.element(document).ready(function () {
+      $scope.info = {
+        realname: '',
+        gender: 1,
+      };
+
+      $scope.personalSuccess = false;
+      $scope.select = function (type) {
+        $scope.info.gender = type;
+      };
+      $scope.sex = {
+        1: '男',
+        2: '女'
       }
-      $scope.personalSuccess = true;
-      $scope.info = data
+      User.getSettingInfo().then(function (data) {
+        if (data.realname == '') {
+          $scope.personalSuccess = true;
+          $scope.info = {
+            realname: '',
+            gender: 1,
+          };
+          return false;
+        }
+        $scope.personalSuccess = false;
+        $scope.info = data
+      })
     })
+
     $scope.submit = function () {
       var info = {
         realname: $scope.info.realname,

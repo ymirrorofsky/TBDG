@@ -22,6 +22,7 @@
 			<p>订&nbsp;单&nbsp;编&nbsp;号：{{orderInfo.orderId}}</p>
 			<p>订&nbsp;单&nbsp;金&nbsp;额：{{orderInfo.price}}元</p>
 			<p>状&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;态：{{orderStatus[orderInfo.status]}}</p>
+			<p ng-if="orderInfo.status == 5">快&nbsp;递&nbsp;单&nbsp;号：{{'zh158456864314' || '无(卖家未发货)'}}  <span ng-click="copy()">复制单号</span></p>
 		</div>
 		<div>
 			<div class="yd-pay-voucher"><span ng-click="showOrder()">点击查看订单凭证</span></div>
@@ -29,6 +30,7 @@
 		<button class="button button-block button-assertive zl_btn_center" ng-if="orderInfo.status == 1" ui-sref='user.pay({orderId:orderId,price:price})'>支付</button>
 		<button class="button button-block button-assertive zl_btn_center" ng-if="orderInfo.status == 3" ng-click="sureFinish()">完成订单</button>
 		<button class="button button-block button-assertive zl_btn_center" ng-if="orderInfo.status == 3" ng-click='returnApply()'>申请退货</button>
+		<button class="button button-block button-assertive zl_btn_center" ng-if="orderInfo.status == 5" ng-click="express()" style="background-color: #ef4e3a;">快递查询入口</button>
 		<button class="button button-block button-assertive zl_btn_center" ng-if="orderInfo.status == 2" ng-click="sureGet()">确认收货</button>
-	</ion-content>
+	</ion-content>  
 </ion-view>
