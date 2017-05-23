@@ -833,15 +833,12 @@ angular.module('starter.services', [])
         return deferred.promise;
       },
       //确认shouh
-      getGoodReturn: function (orderInfo) {
+      return: function (orderInfo) {
+        console.log(orderInfo)
         var deferred = $q.defer();
         var _json = {
           op: 'return',
-          goodsName: orderInfo.goodName,
-          price: orderInfo.price,
-          mobile: orderInfo.mobile,
-          thumbs: orderInfo.img,
-          message: orderInfo.message,
+          orderId:orderInfo.orderId,
           returnMsg: orderInfo.returnMsg
         }
         Message.loading();
@@ -849,6 +846,25 @@ angular.module('starter.services', [])
           Message.hidden();
           if (response.code == 0) {
             deferred.resolve();
+          } else if (response.code == 1) {
+            Message.show(response.msg);
+          }
+        })
+        return deferred.promise;
+      },
+      getGoodReturn: function (reSelect,page) {
+        var deferred = $q.defer();
+        page=page || 1;
+        var _json = {
+          op: 'getGoodReturn',
+          reSelect:reSelect,
+          page:page
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+          if (response.code == 0) {
+            deferred.resolve(response);
           } else if (response.code == 1) {
             Message.show(response.msg);
           }

@@ -29,8 +29,9 @@
             </h2>
             <div class="buy-list" style="padding-top: 5px;">
                 <ul class="clearfix">
-                    <li ng-repeat="item in info.navigation">
-                        <a ng-href="{{item.link}}">
+                    <li ng-repeat="item in info.navigation" ng-click="openLink(item.link)">
+                        <a >
+                            <!--ng-href="{{item.link}}"-->
                             <div class="buy-img">
                                 <img ng-src="{{item.thumb}}" />
                             </div>

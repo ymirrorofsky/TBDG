@@ -1,7 +1,7 @@
 angular.module('starter.controllers', [])
 
-  .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate, $ionicLoading) {
-    if(!$rootScope.globalInfo.user.uid){
+  .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate, $ionicLoading, $cordovaInAppBrowser) {
+    if (!$rootScope.globalInfo.user.uid) {
       $state.go('auth.login')
     }
     User.getHome().then(function (data) {
@@ -30,6 +30,27 @@ angular.module('starter.controllers', [])
       })
 
 
+    }
+    $scope.openLink = function (url) {
+      $scope.url = url
+      var options = {
+        location: 'yes',
+        clearcache: 'yes',
+        toolbar: 'no'
+      };
+      document.addEventListener("deviceready", function () {
+        $cordovaInAppBrowser.open($scope.url, '_blank', options)
+          .then(function (event) {
+            // success
+          })
+          .catch(function (event) {
+            // error
+          });
+
+
+        // $cordovaInAppBrowser.close();
+
+      }, false);
     }
 
 
@@ -518,47 +539,35 @@ angular.module('starter.controllers', [])
 
 
   })
-  .controller('userOrderInfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal) {
+  .controller('userOrderInfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal, Message) {
     $scope.orderStatus = {
       '1': '待付款',
       '2': '待收货',
-      '3': '以收货',
+      '3': '已收货',
       '4': '退货',
       '5': '已完成',
       '6': '正返现',
       '7': '已返完',
+      '8': '退货申请中',
+      '9': '已退货'
     }
+    $scope.$on('returnStatus', function (event, orderInfo) {
+      if (orderInfo.status == 4) {
+        if (orderInfo.select_re == 1) {
+          $scope.orderInfo.status = 8
+        } else if (orderInfo.select_re == 2) {
+          $scope.orderInfo.status = 9
+        }
+      }
+    })
     Order.getInfo($stateParams.orderId).then(function (response) {
       $scope.orderInfo = response.data
       $scope.payInfo = {};
       if ($scope.orderInfo.thumbs) {
         $scope.payInfo.img = $scope.orderInfo.thumbs
       }
-      // if ($scope.orderInfo.status == 3) {
-      //   if ($scope.orderInfo.timeout) {
-
-      //   }
-      // }
+      $scope.$broadcast('returnStatus', $scope.orderInfo)
     })
-    $scope.sureGet = function () {
-      Order.sureGet($stateParams.orderId).then(function (data) {
-        $state.go('user.orderList', ({ type: 3 }))
-      })
-    }
-    $scope.sureFinish = function () {
-      Order.sureFinish($stateParams.orderId).then(function (data) {
-        $state.go('user.orderList', ({ type: 5 }))
-      })
-    }
-    $scope.return = function () {
-      Order.return($scope.orderInfo).then(function (data) {
-        $state.go('user.orderList', ({ type: 4 }))
-      })
-    }
-    $scope.returnApply = function () {
-      $scope.returnModal.show();
-
-    }
     $ionicModal.fromTemplateUrl('templates/modal/return.html', {
       scope: $scope,
       animation: 'slide-in-right'
@@ -574,6 +583,31 @@ angular.module('starter.controllers', [])
     $scope.showOrder = function () {
       $scope.orderImg.show()
     }
+    $scope.sureGet = function () {
+      Order.sureGet($stateParams.orderId).then(function (data) {
+        $state.go('user.orderList', ({ type: 3 }))
+      })
+    }
+    $scope.sureFinish = function () {
+      Order.sureFinish($stateParams.orderId).then(function (data) {
+        $state.go('user.orderList', ({ type: 5 }))
+      })
+    }
+    $scope.return = function () {
+      if (!$scope.orderInfo.returnMsg) {
+        Message.show('请填写退货原因');
+        return;
+      }
+      Order.return($scope.orderInfo).then(function (data) {
+        $scope.returnModal.hide()
+        $state.go('user.goodReturn', ({ type: 1 }), { reload: true });
+      })
+    }
+    $scope.returnApply = function () {
+      $scope.returnModal.show();
+
+    }
+
 
 
   })
@@ -1284,8 +1318,8 @@ angular.module('starter.controllers', [])
     $scope.type = $stateParams.type;
     $scope.returnList = {};
     $scope.orderEmpty = false;
-    $scope.select = $scope.type || 1;
-    Order.getGoodReturn($scope.select).then(function (response) {
+    $scope.reSelect = $scope.type || 1;
+    Order.getGoodReturn($scope.reSelect).then(function (response) {
       if (response.data == '' || response.data.length == 0) {
         $scope.orderEmpty = true;
       } else {
@@ -1295,7 +1329,7 @@ angular.module('starter.controllers', [])
     });
 
     $scope.active = function (id) {
-      $scope.select = id;
+      $scope.reSelect = id;
       $scope.noMore = false;
       Order.getGoodReturn(id).then(function (response) {
         if (response.data == '' || response.data.length == 0) {
@@ -1310,7 +1344,7 @@ angular.module('starter.controllers', [])
     // 下拉刷新
     $scope.doRefresh = function () {
       $scope.noMore = true;
-      Order.getGoodReturn($scope.select).then(function (response) {
+      Order.getGoodReturn($scope.reSelect).then(function (response) {
         if (response.data == '' || response.data.length == 0) {
           $scope.orderEmpty = true;
         } else {
@@ -1332,7 +1366,7 @@ angular.module('starter.controllers', [])
     $scope.noMore = false;
     $scope.page = 2;
     $scope.loadMore = function () {
-      Order.getGoodReturn($scope.select, $scope.page).then(function (response) {
+      Order.getGoodReturn($scope.reSelect, $scope.page).then(function (response) {
         $scope.page++;
         $scope.returnList = $scope.repoList.concat(response.data);
         $scope.$broadcast('scroll.infiniteScrollComplete');

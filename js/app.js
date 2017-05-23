@@ -6,7 +6,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
         cordova.plugins.keyboard.disableScroll(true)
       }
       if (window.StatusBar) {
-        Status.Bar.styleDefault()
+        StatusBar.backgroundColorByHexString("#ff6600");
       }
     })
 
@@ -34,12 +34,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
     //退出
     var exit = false;
     $ionicPlatform.registerBackButtonAction(function (e) {
-      if ($location.path() == '/tab/home') {
+      if ($location.path() == '/tab/home' || $location.path() == '/auth/login') {
         if (exit) {
           ionic.Platform.exitApp();
         } else {
           exit = true;
-          Message.show('再按一次退出系统', "1000");
+          Message.show('再按一次退出系统', "500");
           setTimeout(function () {
             exit = false;
           }, 3000);
@@ -48,7 +48,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
         $ionicHistory.goBack();
       } else {
         exit = true;
-        Message.show('再按一次退出系统', "1000");
+        Message.show('再按一次退出系统', "500");
         setTimeout(function () {
           exit = false;
         }, 3000);
@@ -62,7 +62,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
     'TB_URL': 'http://192.168.0.122/app/index.php?i=1&c=entry&m=taobao',
     'REGULAR_MONEY': /^\d*(\.\d{1,2}){0,1}$/,
     'REGULAR_MOBILE': /^1\d{10}$/,
-		'REGULAR_IDCARD': /^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/,
+    'REGULAR_IDCARD': /^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/,
     'BANK_CARD': /^(\d{16}|\d{19})$/,
   })
   .config(function ($ionicConfigProvider) {
