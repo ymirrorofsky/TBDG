@@ -1,31 +1,49 @@
 angular.module('starter.controllers', [])
 
-  .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate, $ionicLoading, $cordovaInAppBrowser) {
-    if (!$rootScope.globalInfo.user.uid) {
-      $state.go('auth.login')
-    }
+  .controller('homeCtrl', function ($scope, Storage, $ionicPopup, $state, $rootScope, User, $ionicSlideBoxDelegate, $ionicLoading, $cordovaInAppBrowser, $timeout) {
+
+    $scope.$on("$ionicView.enter", function () {
+      if (!$rootScope.globalInfo.user.uid) {
+        $state.go('auth.login')
+      }
+    });
+    // angular.element(document).ready(function () {
+    //   var goodWidth = document.getElementsByClassName('goods')[1]
+    //   console.log(goodWidth)       
+    // })
     User.getHome().then(function (data) {
       console.log('返回成功')
       $scope.info = data;
       if ($scope.info.banner) {
-        $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
+        $timeout(function () {
+          var swiper = new Swiper('.swiper-container', {
+            autoplay: 4000,
+            loop: true,
+            pagination: '.swiper-pagination',
+            paginationClickable: true
+          });
+        }, 0)
+      } else {
+
       }
+
     })
 
     $scope.doRefresh = function () {
       User.getHome().then(function (data) {
-        console.log(data.banner)
-        $scope.info.goods = data.goods;
-        $scope.info.navigation = data.navigation;
+        $scope.info = data;
         $scope.$broadcast('scroll.refreshComplete');
         $ionicLoading.show({
           noBackdrop: true,
           template: '刷新成功！',
           duration: '2000'
         });
-        if ($scope.info.banner) {
-          $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
-        }
+        // if ($scope.info.banner) {
+        //   $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
+        //   $scope.info.banner = data.banner;
+        //   $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
+
+        // }
 
       })
 
@@ -127,19 +145,47 @@ angular.module('starter.controllers', [])
       }
     ]
     $scope.createOrder = function () {
-      if ($rootScope.globalInfo.user.role == 0) {
-        console.log('role==0')
-        var alertPopup = $ionicPopup.alert({
-          title: '提示',
-          template: '该账号不能下单，请先购买会员商品',
-          okText: '确定'
-        });
-        alertPopup.then(function (res) {
-          return false;
-        });
-      } else {
-        $state.go('user.createOrder')
-      }
+    	 User.getrole().then(function (response) {
+        console.log(response);
+        if (response.code == 0) {
+          if (response.data == 0) {
+    	 				  var alertPopup = $ionicPopup.alert({
+              title: '提示',
+              template: '该账号不能下单，请先购买会员商品',
+              okText: '确定'
+            });
+            alertPopup.then(function (res) {
+              return false;
+            });
+          } else {
+            $rootScope.globalInfo.user.role = response.data;
+            console.log($rootScope.globalInfo.user.role);
+            $state.go('user.createOrder');
+          }
+        } else {
+    	 		  var alertPopup = $ionicPopup.alert({
+            title: '提示',
+            template: '该账号不能下单，请先购买会员商品',
+            okText: '确定'
+          });
+          alertPopup.then(function (res) {
+            return false;
+          });
+        }
+    	 });
+      //    if ($rootScope.globalInfo.user.role == 0) {
+      //      console.log('role==0')
+      //      var alertPopup = $ionicPopup.alert({
+      //        title: '提示',
+      //        template: '该账号不能下单，请先购买会员商品',
+      //        okText: '确定'
+      //      });
+      //      alertPopup.then(function (res) {
+      //        return false;
+      //      });
+      //    } else {
+      //      $state.go('user.createOrder')
+      //    }
 
     }
 
@@ -147,6 +193,11 @@ angular.module('starter.controllers', [])
 
   .controller('myCtrl', function ($rootScope, $scope, $state, Message, User, $ionicLoading) {
     $scope.myInfo = {};
+    $scope.rank = {
+      '1': '金牌',
+      '2': '银牌',
+      '3': '铜牌'
+    }
     User.getMyInfo().then(function (data) {
       $scope.info = data
     })
@@ -165,12 +216,14 @@ angular.module('starter.controllers', [])
     }
 
   })
-  .controller('loginCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, Auth) {
-    if ($rootScope.globalInfo.user.uid) {
-      $state.go('tab.home')
-    }
-
-
+  .controller('loginCtrl', function ($rootScope, $scope, $ionicModal, $state, Message, Auth, $ionicHistory) {
+    $scope.$on("$ionicView.enter", function () {
+      $ionicHistory.clearCache();
+      $ionicHistory.clearHistory();
+      if ($rootScope.globalInfo.user.uid) {
+        $state.go('tab.home')
+      }
+    });
 
     $scope.agree = true;
     $scope.authAgree = function () {
@@ -333,7 +386,7 @@ angular.module('starter.controllers', [])
       }
     };
   })
-  .controller('goodInfoCtrl', function ($rootScope, $scope, $stateParams, User, $ionicSlideBoxDelegate) {
+  .controller('goodInfoCtrl', function ($rootScope, $scope, Message, $stateParams, User, Order, $ionicSlideBoxDelegate, $state) {
     $scope.cid = $stateParams.role;
     $scope.cidStatus = {
       '1': '金牌',
@@ -351,6 +404,101 @@ angular.module('starter.controllers', [])
         $ionicSlideBoxDelegate.$getByHandle("slideimgs").update();
       }
     })
+    $scope.buymemgoods = function () {
+      Order.memcreate($scope.info.id).then(function (response) {
+        if (response.code == 0) {
+          $state.go('user.memOrderinfo', { orderId: response.data.orderId });
+        } else {
+          Message.show(response.msg);
+        }
+      })
+    }
+
+  })
+  .controller('memOrderinfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal, Message, $cordovaClipboard, $cordovaInAppBrowser) {
+    console.log($stateParams);
+    $scope.orderStatus = {
+      '1': '待付款',
+      '2': '待收货',
+      '3': '已收货',
+      '4': '退货',
+      '5': '已完成',
+      '6': '激励中',
+      '7': '已激励',
+      '8': '退货申请中',
+      '9': '退货已通过',
+      '10': '退货已拒绝'
+    }
+    Order.getmemorderInfo($stateParams.orderId).then(function (response) {
+      $scope.orderInfo = response.data
+      $scope.payInfo = {};
+      if ($scope.orderInfo.thumbs) {
+        $scope.payInfo.img = $scope.orderInfo.thumbs
+      }
+      $scope.$broadcast('returnStatus', $scope.orderInfo)
+    })
+    $ionicModal.fromTemplateUrl('templates/modal/return.html', {
+      scope: $scope,
+      animation: 'slide-in-right'
+    }).then(function (modal) {
+      $scope.returnModal = modal;
+    })
+    $ionicModal.fromTemplateUrl('templates/modal/showOrder.html', {
+      scope: $scope,
+      animation: 'slide-in-right'
+    }).then(function (modal) {
+      $scope.orderImg = modal;
+    })
+    $scope.showOrder = function () {
+      $scope.orderImg.show()
+    }
+    $scope.sureGet = function () {
+      Order.sureGet($stateParams.orderId).then(function (data) {
+        $state.go('user.orderList', ({ type: 3 }))
+      })
+    }
+    $scope.sureFinish = function () {
+      Order.sureFinish($stateParams.orderId).then(function (data) {
+        $state.go('user.orderList', ({ type: 5 }))
+      })
+    }
+    $scope.return = function () {
+      if (!$scope.orderInfo.returnMsg) {
+        Message.show('请填写退货原因');
+        return;
+      }
+      Order.return($scope.orderInfo).then(function (data) {
+        $scope.returnModal.hide()
+        $state.go('user.goodReturn', ({ type: 1 }), { reload: true });
+      })
+    }
+    $scope.returnApply = function () {
+      $scope.returnModal.show();
+    }
+    $scope.express = function () {
+      var options = {
+        location: 'yes',
+        clearcache: 'yes',
+        toolbar: 'no'
+      };
+      document.addEventListener("deviceready", function () {
+        $cordovaInAppBrowser.open('http://www.kuaidi100.com/', '_blank', options)
+          .then(function (event) {
+          })
+          .catch(function (event) {
+          });
+      }, false);
+    }
+    $scope.copy = function () {
+      $cordovaClipboard
+        .copy(orderInfo.expressId)
+        .then(function () {
+          Message.show('复制成功', 1000)
+        }, function () {
+          // error
+        });
+
+    }
 
 
   })
@@ -360,9 +508,30 @@ angular.module('starter.controllers', [])
       goodName: '',
       price: '',
       mobile: '',
+      platform: '',
+      id: '',
       img: '',
       message: ''
     };
+    $scope.showPlatform = false;
+    $scope.platformType = function (id, title) {
+      $scope.payInfo.id = id;
+      $scope.payInfo.platform = title;
+      $scope.showPlatform = true;
+    }
+    // $scope.info = [{
+    //   x: '1',
+    //   title: '淘宝'
+    // }, {
+    //     x: '2',
+    //     title: '天猫'
+    //   }, {
+    //     x: '3',
+    //     title: '京东'
+    //   }]
+    Order.getPlatform().then(function (data) {
+      $scope.info = data;
+    })
     var selectImages = function (from) {
       var options = {
         quality: 80,
@@ -450,10 +619,13 @@ angular.module('starter.controllers', [])
 
   })
   .controller('userPayCtrl', function ($scope, $rootScope, $stateParams, Payment) {
+    console.log($stateParams);
     $scope.payInfo = {}
     $scope.payInfo.orderId = $stateParams.orderId;
-    $scope.payInfo.price = $stateParams.price;
+    $scope.payInfo.price = $stateParams.Price;
+    $scope.memType = $stateParams.memtype;
     $scope.payType = 'alipay';
+
     $scope.selectPayType = function (type) {
       $scope.payType = type;
     };
@@ -468,7 +640,7 @@ angular.module('starter.controllers', [])
         Payment.wechatPay(model);
       } else if ($scope.payType == 'alipay') {
         console.log('支付宝')
-        Payment.alipay('welfare', $scope.payInfo)
+        Payment.alipay('welfare', $scope.payInfo, $scope.memType)
       }
     };
   })
@@ -479,8 +651,8 @@ angular.module('starter.controllers', [])
       '3': '已收货',
       '4': '退货',
       '5': '已完成',
-      '6': '正返现',
-      '7': '已返完',
+      '6': '激励中',
+      '7': '已激励',
     }
     $scope.orderEmpty = false;
     $scope.type = $stateParams.type;
@@ -539,24 +711,29 @@ angular.module('starter.controllers', [])
 
 
   })
-  .controller('userOrderInfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal, Message, $cordovaClipboard) {
+  .controller('userOrderInfoCtrl', function ($scope, $rootScope, $stateParams, Order, $state, $ionicModal, Message, $cordovaClipboard, $cordovaInAppBrowser, $ionicPopup) {
     $scope.orderStatus = {
       '1': '待付款',
       '2': '待收货',
       '3': '已收货',
-      '4': '退货',
+      '4': '退货已通过',
       '5': '已完成',
       '6': '正返现',
       '7': '已返完',
       '8': '退货申请中',
-      '9': '已退货'
+      '9': '退货已通过',
+      '10': '退货已拒绝'
     }
     $scope.$on('returnStatus', function (event, orderInfo) {
-      if (orderInfo.status == 4) {
+      if (orderInfo.status == 3) {
         if (orderInfo.select_re == 1) {
           $scope.orderInfo.status = 8
         } else if (orderInfo.select_re == 2) {
           $scope.orderInfo.status = 9
+        } else if (orderInfo.select_re == 3) {
+          $scope.orderInfo.status = 10
+        } else if (orderInfo.select_re == 0) {
+          $scope.orderInfo.status = 3
         }
       }
     })
@@ -580,28 +757,47 @@ angular.module('starter.controllers', [])
     }).then(function (modal) {
       $scope.orderImg = modal;
     })
+    //展现订单凭证
     $scope.showOrder = function () {
       $scope.orderImg.show()
     }
+    //确认收货
     $scope.sureGet = function () {
       Order.sureGet($stateParams.orderId).then(function (data) {
-        $state.go('user.orderList', ({ type: 3 }))
+        $state.go('tab.my')
       })
     }
+    //确认完成
     $scope.sureFinish = function () {
       Order.sureFinish($stateParams.orderId).then(function (data) {
-        $state.go('user.orderList', ({ type: 5 }))
+        $state.go('tab.my')
       })
     }
+    //申请退货
+
+
     $scope.return = function () {
       if (!$scope.orderInfo.returnMsg) {
         Message.show('请填写退货原因');
         return;
       }
-      Order.return($scope.orderInfo).then(function (data) {
-        $scope.returnModal.hide()
-        $state.go('user.goodReturn', ({ type: 1 }), { reload: true });
-      })
+      var confirmPopup = $ionicPopup.confirm({
+        title: '提示',
+        template: '确定申请退货吗?',
+        cancelText: '取消',
+        okText: '确定'
+      });
+      confirmPopup.then(function (res) {
+        if (res) {
+          Order.return($scope.orderInfo).then(function (data) {
+            $scope.returnModal.hide()
+            $state.go('tab.my', { reload: true });
+          })
+        } else {
+          console.log('You are not sure');
+        }
+      });
+
     }
     $scope.returnApply = function () {
       $scope.returnModal.show();
@@ -622,9 +818,9 @@ angular.module('starter.controllers', [])
     }
     $scope.copy = function () {
       $cordovaClipboard
-        .copy('ah556568444451')
+        .copy($scope.orderInfo.expressId)
         .then(function () {
-          Message.show('复制成功',1000)
+          Message.show('复制成功', 1000)
         }, function () {
           // error
         });
@@ -766,7 +962,6 @@ angular.module('starter.controllers', [])
       $scope.allow = false;
       User.MoneyNote().then(function (data) {
         $scope.MoneyNote = data;
-        console.log($scope.MoneyNote)
       })
       //请求提现余额及其他
       User.getRealMoneytotal().then(function (data) {
@@ -803,10 +998,10 @@ angular.module('starter.controllers', [])
           Message.show('请输入提现金额');
           return;
         }
-        // if ($scope.info.takeMoney > $scope.info.money) {
-        //   Message.show('提现余额不足');
-        //   return;
-        // }
+        if ($scope.info.takeMoney > $scope.info.money) {
+          Message.show('提现余额不足');
+          return;
+        }
         // if ($scope.info.takeMoney < $scope.info.cost.cash_less) {
         //   console.log('yanby')
         //   Message.show('单次提现金额最低为' + $scope.info.cost.cash_less + '元');
@@ -1407,5 +1602,10 @@ angular.module('starter.controllers', [])
       });
     };
   })
-
+  .controller('userRecommendCtrl', function ($scope, User) {
+  		$scope.myQrcode = {};
+    User.recomCode().then(function (data) {
+      $scope.myQrcode = data;
+    });
+  })
 

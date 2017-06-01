@@ -15,7 +15,7 @@
                 <p ng-click="showAlert()">推荐消费总收益(元)</p>
             </div>
 
-            <div class="my-header">
+            <div class="my-header" style="height:60px;">
                 <ul class="clearfix" style="padding: 5px 0;">
                     <li>
                         <div>
@@ -52,7 +52,7 @@
                             <div class="flex">
                                 <p class="flex_1 text-overflow_1">订单编号:<span ng-bind="item.orderId"></span>
                                 </p>
-                                <span>姓名：<em ng-bind="item.realname"></em></span>
+                                <span>会员ID：<em ng-bind="item.realname"></em></span>
                             </div>
                             <div class="flex bottom">
                                 <p class="flex_1">时间：<span ng-bind="item.createtime*1000 | date:'yyyy-MM-dd HH:mm'"></span></p>

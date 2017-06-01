@@ -26,6 +26,11 @@ body {
 ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-color-active-positive .tab-item.active, ion-tabs.tabs-color-active-positive .tab-item.activated {
     color: #FE5400;
 }
+
+
+.gold {
+
+}
 /*登录页面样式*/
 .t_login_user {
 	text-align: center;
@@ -364,6 +369,20 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 	right:16px;
 	top:5px;
 }
+.yd-donate-count li .beanType i{
+	margin-left:3px;
+}
+.yd-donate-count li span{
+	color: #fe5400;
+}
+.yd-donate-count li .bean{
+	position: absolute;
+	left:0;
+	width: 100%;
+	text-align: center;
+	z-index: 9999;
+	background: #fff
+}
 /*实名认证*/
 .real-count li{
 	margin-top:10px;
@@ -476,6 +495,13 @@ ion-tabs.tabs-color-active-positive .tab-item.tab-item-active, ion-tabs.tabs-col
 	color:#fff;
 	padding:20px 0;
 }
+.my-header .mobile i.gold{
+	color: gold;
+    padding: 0;
+    font-size: 21px;
+    position: relative;
+    top: 2px;
+}
 .order_center {
 	margin: 10px 0;
 	background: #fff;
@@ -586,6 +612,11 @@ padding: 5px 0;
 .shop-order-list li p{
 	margin:0;
 }
+.shop-order-list .arrow-right {
+	position: relative;
+	top: 1em;
+	color:#bbb;
+}
 .yd-shops-order{
 	padding:10px 0 0;
 	margin-bottom:15px;
@@ -603,6 +634,18 @@ padding: 5px 0;
 	margin:0;
 	line-height:40px;
 }
+.yd-shops-order .express{
+    display: inline-block;
+    width: 4em;
+    text-align: center;
+    background: #fe5400;
+    border-radius: 5px;
+    color: #fff;
+    margin-left: 1em;
+	
+}
+
+
 .t_mess_list {
 	margin-top: 10px;
 	background-color: #fff;
@@ -709,11 +752,7 @@ padding: 5px 0;
 	margin:0;
 }
 /*推荐人数详情*/
-.my-header{
-	height:60px;
-	background: #ff5b1f;
 
-}
 .my-header .mobile{
 	text-align: center;
 	color: #fff;
@@ -832,4 +871,9 @@ padding: 5px 0;
 	padding:5px;
 	border:2px dotted #ff6600;
 	border-radius: 5px;
+}
+/*推荐二维码*/
+.yd-rec-qcode{
+	margin-top:20px;
+	text-align: center;
 }

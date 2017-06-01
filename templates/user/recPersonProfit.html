@@ -15,7 +15,7 @@
                 <p ng-click="showAlert()">推荐会员总收益(元)</p>
             </div>
 
-            <div class="my-header">
+            <div class="my-header" style="height:60px">
                 <ul class="clearfix" style="padding: 5px 0;">
                     <li>
                         <div>
@@ -49,13 +49,13 @@
             <div class="yd-mesg-coutent" ng-if="!orderEmpty">
                 <div class="row">
                     <div class="col" style="flex:1;">时间</div>
-                    <div class="col" style="flex:1;">姓名</div>
+                    <div class="col" style="flex:1;">会员ID</div>
                     <div class="col" style="flex:1;">收益(元)</div>
                 </div>
                 <div class="row" ng-repeat="item in info.profitList">
                     <div class="col" style="flex:1;"> <span ng-bind="item.createtime*1000 | date:'yyyy-MM-dd HH:mm'"></span></div>
-                    <div class="col" style="flex:1;"><span ng-bind="item.realname"></span></div>
-                    <div class="col" style="flex:1;"><span ng-bind="item.price"></span></div>
+                    <div class="col" style="flex:1;"><span ng-bind="item.uid"></span></div>
+                    <div class="col" style="flex:1;"><span ng-bind="item.tuijian_money"></span></div>
                 </div>
             </div>
 

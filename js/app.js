@@ -1,5 +1,5 @@
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'starter.services', 'starter.directives', 'ngCordova', 'ngResource', 'ngTouch'])
-  .run(function ($rootScope, $ionicPlatform, Storage, $cordovaSplashscreen, $location, $ionicHistory, $interval, Message) {
+  .run(function ($rootScope, $ionicPlatform, Storage, $cordovaSplashscreen, $location, $ionicHistory, $interval, Message, User, $state) {
     $ionicPlatform.ready(function () {
       if (window.cordova && window.cordova.plugins && window.cordova.plugins.keyboard) {
         cordova.plugins.keyboard.hideKeyboardAccessoryBar(true);
@@ -19,6 +19,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
       })()
     };
 
+    // 监听路由变化
+    $rootScope.$on('$stateChangeStart', function (event, toState) {
+      //Object {url: "/login", cache: false, templateUrl: "templates/auth/login.html", controller: "loginCtrl", name: "auth.login"}
+      var noNeedLogin = ['auth.login', 'auth.register', 'auth.resetPsd', 'oneLogin'];
+      if (noNeedLogin.indexOf(toState.name) < 0 && !User.checkAuth()) {
+        $state.go("auth.login"); //跳转到登录页
+        event.preventDefault(); //阻止默认事件，即原本页面的加载
+      }
+    });
+
     // cordova初始化后的操作
     document.addEventListener("deviceready", function () {
       //退出启动画面
@@ -34,7 +44,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
     //退出
     var exit = false;
     $ionicPlatform.registerBackButtonAction(function (e) {
-      if ($location.path() == '/tab/home' || $location.path() == '/auth/login') {
+      if ($location.path() == '/tab/home' || $location.path() == '/auth/login' || $location.path() == '/tab/my') {
         if (exit) {
           ionic.Platform.exitApp();
         } else {
@@ -60,6 +70,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.routes', 'st
   })
   .constant('ENV', {
     'TB_URL': 'http://192.168.0.122/app/index.php?i=1&c=entry&m=taobao',
+    // 'TB_URL': 'http://zhsc.weishang6688.com/app/index.php?i=1&c=entry&m=dgmc',
     'REGULAR_MONEY': /^\d*(\.\d{1,2}){0,1}$/,
     'REGULAR_MOBILE': /^1\d{10}$/,
     'REGULAR_IDCARD': /^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/,

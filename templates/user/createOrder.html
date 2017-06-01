@@ -26,7 +26,17 @@
                     <label>联系方式</label>                   
                     <input type="text" placeholder="请输入联系方式" ng-model="payInfo.mobile">
                 </li>
+                <li ng-click="showPlatform = !showPlatform">
+                    <div class="flex beanType">
+                        <p class="flex_1">请选择购买的平台</p>
+                        <span>{{payInfo.platform || '请选择'}}<i class="iconfont icon-unfold" ng-if="showPlatform"></i><i class="iconfont icon-right" ng-if="!showPlatform"></i></span>
+                    </div>
+                    <div class="bean" ng-if="showPlatform">
+                        <p ng-click="platformType(item.id,item.title)" ng-repeat="(id,item) in info">{{item.title}}</p>
+                    </div>
+                </li>
             </ul>
+            
             <section class="home-goods">
                 <h2 class="goods-title">
                     <i class="iconfont icon-zhifu" style="position:relative;top:3px;"></i>

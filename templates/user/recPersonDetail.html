@@ -43,17 +43,17 @@
             <div class="col" ng-click="active(3)" ng-class="{'active': select == 3}" style="padding:0">铜牌 <span ng-bind="info.count.copper || 0"></span> (人)</div>
         </div>
         <div class="bodybg-normal">
-            <div class="common-empty" ng-if="orderEmpty"> </div>
+            <div class="common-empty" ng-if="orderEmpty">什么都没有 </div>
                <div class="yd-mesg-coutent" ng-if="!orderEmpty">
                     <div class="row">
                         <div class="col" style="flex:1;">时间</div>
                         <div class="col" style="flex:1;">账号</div>
-                        <div class="col" style="flex:1;">姓名</div>
+                        <div class="col" style="flex:1;">会员ID</div>
                     </div>
                     <div class="row"  ng-repeat="item in info.recList">
                         <div class="col" style="flex:1;"> <span ng-bind="item.createtime*1000 | date:'yyyy-MM-dd HH:mm'"></span></div>
                         <div class="col" style="flex:1;"> <span ng-bind="item.mobile"></span></div>
-                        <div class="col" style="flex:1;"><span ng-bind="item.realname"></span></div>
+                        <div class="col" style="flex:1;"><span ng-bind="item.uid"></span></div>
                     </div>
                 </div>
 

@@ -1,14 +1,15 @@
 <ion-view view-title="退货" hide-nav-bar="true" hide-back-button="true">
     <ion-header-bar class="bar-assertive header-back">
         <div class="buttons">
-            <button class="button iconfont icon-back1 button-clear" ng-click="$ionicGoBack()">返回</button>
+            <button class="button iconfont icon-back1 button-clear" ui-sref='tab.my'>返回</button>
         </div>
         <h1 class="title">退货</h1>
     </ion-header-bar>
     <div class="bar bar-subheader" style="padding: 0;">
         <div class="row">
-            <div class="col" ng-click="active(1)" ng-class="{'active': reSelect == 1}">退货申请中</div>
-            <div class="col" ng-click="active(2)" ng-class="{'active': reSelect == 2}">退货完成</div>
+            <div class="col" ng-click="active(1)" ng-class="{'active': reSelect == 1}">申请中</div>
+            <div class="col" ng-click="active(2)" ng-class="{'active': reSelect == 2}">已通过</div>
+            <div class="col" ng-click="active(3)" ng-class="{'active': reSelect == 3}">已拒绝</div>
         </div>
     </div>
     <ion-content class="bodybg-normal" style="top:88px">
@@ -22,7 +23,7 @@
                             <p class="flex_1 text-overflow_1">商品名称：<i ng-bind="item.goodsName"></i></p><span>金额：<em class="positive" ng-bind="item.price"></em>元</span>
                         </div>
                         <div class="flex bottom">
-                            <p class="flex_1">订单编号：<i ng-bind="item.orderId"></i></p><span>
+                            <p class="flex_1">订单编号：<i ng-bind="item.orderId"></i></p> <span><i class="iconfont icon-right arrow-right"></i></span>
                         </div>
                         <div class="flex bottom">
                             <p class="flex_1">下单时间：<i ng-bind="item.createtime*1000 | date:'yyyy-MM-dd HH:mm'"></i></p>

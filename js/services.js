@@ -263,6 +263,15 @@ angular.module('starter.services', [])
         });
         return deferred.promise;
       },
+       getrole: function () {
+        var deferred = $q.defer();
+        Message.loading();
+        resource.save({ op: 'getrole' }, function (response) {
+          Message.hidden();
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+      },
       getGoodInfo: function (cid) {
         var deferred = $q.defer();
         resource.save({ op: 'goodInfo', cid: cid }, function (response) {
@@ -706,6 +715,19 @@ angular.module('starter.services', [])
           Message.show('通信错误，请检查网络!', 1500);
         });
         return deferred.promise;
+      },
+      recomCode:function(){
+        var deferred=$q.defer();
+        Message.loading();
+        resource.save({op:'getQrcode'},function(response){
+          Message.hidden();
+          if(response.code == 0){
+            deferred.resolve(response.data)
+          }else{
+            Message.show(response.msg);
+          }
+        })
+        return deferred.promise;
       }
 
 
@@ -714,6 +736,19 @@ angular.module('starter.services', [])
   .factory('Order', function ($resource, $rootScope, $q, ENV, Message, $state, Storage) {
     var resource = $resource(ENV.TB_URL + '&do=order', { op: '@op' });
     return {
+      getPlatform:function(){
+        var deferred=$q.defer();
+        Message.loading();
+        resource.save({op:'getPlatform'},function(response){
+           Message.hidden();
+          if(response.code == 0){
+            deferred.resolve(response.data);
+          }else{
+            Message.show(response.msg)
+          }
+        })
+        return deferred.promise;
+      },
       create: function (payInfo) {
         var deferred = $q.defer();
         var _json = {
@@ -721,6 +756,7 @@ angular.module('starter.services', [])
           goodsName: payInfo.goodName,
           price: payInfo.price,
           mobile: payInfo.mobile,
+          id:payInfo.id,
           thumbs: payInfo.img,
           message: payInfo.message,
         }
@@ -734,6 +770,18 @@ angular.module('starter.services', [])
             deferred.reject();
           }
 
+        });
+        return deferred.promise;
+      },
+        memcreate: function (id) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'becomeMumber',
+          id: id
+        }
+        resource.save(_json, function (response) {
+            Message.hidden();
+            deferred.resolve(response);
         });
         return deferred.promise;
       },
@@ -756,6 +804,19 @@ angular.module('starter.services', [])
             deferred.reject();
           }
 
+        });
+        return deferred.promise;
+      },
+          getmemorderInfo: function (orderId) {
+        var deferred = $q.defer();
+        var _json = {
+          op: 'memorderInfo',
+          orderId: orderId,
+        }
+        Message.loading();
+        resource.get(_json, function (response) {
+          Message.hidden();
+            deferred.resolve(response);
         });
         return deferred.promise;
       },
@@ -892,22 +953,26 @@ angular.module('starter.services', [])
     var resource = $resource(ENV.TB_URL + '&do=payment');
     return {
       // 支付宝支付
-      alipay: function (model, info, order) {
-
-
-
-
-
-
-
+      alipay: function (model, info, ordertype) {
         var _json = {};
         if (model == 'welfare') {
-          _json = {
+        	 if(ordertype&&ordertype=='goods'){
+          	   _json = {
             op: 'getAlipay', /*, uid: userInfo.uid, signature: sign.signature, timestamp: sign.timestamp*/
             model: 'welfare',
             price: info.price,
             orderId: info.orderId,
             uid: $rootScope.globalInfo.user.uid,
+            type:ordertype
+          }
+          }else{
+          	 _json = {
+            op: 'getAlipay', /*, uid: userInfo.uid, signature: sign.signature, timestamp: sign.timestamp*/
+            model: 'welfare',
+            price: info.price,
+            orderId: info.orderId,
+            uid: $rootScope.globalInfo.user.uid,
+          }
           }
         }
         resource.get(_json, function (response) {
@@ -916,7 +981,7 @@ angular.module('starter.services', [])
             cordova.plugins.alipay.payment(payInfo, function (successResults) {
               if (successResults.resultStatus == "9000") {
                 Message.show("支付成功");
-                $state.go('user.orderList', { type: 2 });
+                $state.go('tab.my',{},{reload:true});
               }
             }, function (errorResults) {
               console.error('支付失败：' + errorResults);

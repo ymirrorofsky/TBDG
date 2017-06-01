@@ -61,6 +61,13 @@ angular.module('starter.routes', [])
                 templateUrl: 'templates/user/goodInfo.html',
                 controller: 'goodInfoCtrl'
             })
+            .state('user.memOrderinfo', {
+                url: '/memOrderinfo',
+                cache: false,
+                params: { orderId: '', type: null },
+                templateUrl: 'templates/user/memOrderinfo.html',
+                controller: 'memOrderinfoCtrl'
+            })
             .state('user.createOrder', {
                 url: '/createOrder',
                 cache: false,
@@ -70,7 +77,7 @@ angular.module('starter.routes', [])
             .state('user.pay', {
                 url: '/pay',
                 cache: false,
-                params: { orderId: null, Price: null },
+                params: { orderId: null, Price: null, memtype: '' },
                 templateUrl: 'templates/user/pay.html',
                 controller: 'userPayCtrl'
             })
@@ -183,9 +190,14 @@ angular.module('starter.routes', [])
                 params: {
                     type: null
                 },
-                cache: false,
+                // cache: false,
                 templateUrl: 'templates/user/goodReturn.html',
                 controller: 'goodReturnCtrl'
+            })
+            .state('user.recommend', {
+                url: '/recommend',
+                templateUrl: 'templates/user/recommend.html',
+                controller: 'userRecommendCtrl'
             })
 
 
